@@ -119,6 +119,7 @@
   .fx { position: absolute; left: 0; bottom: 0; pointer-events: none; z-index: 3; line-height: 0; }
   .fx svg { display: block; }
   .regador { transform-origin: 75% 60%; }
+  .corda { height: 2px; bottom: 16px; border-radius: 1px; background: #C9A36A; z-index: 1; }
   .borboleta svg { animation: asa .15s ease-in-out infinite alternate; }
   @keyframes asa { to { transform: scaleX(.3); } }
   .bicho.espia { left: auto; right: -22px; top: 50%; bottom: auto; margin-top: -22px; z-index: 0; }
@@ -199,6 +200,8 @@
   const PINGO = '<svg width="3" height="5"><rect width="3" height="5" rx="1.5" fill="#7FB8F0"/></svg>';
   const PONTO = '<svg width="4" height="4"><circle cx="2" cy="2" r="2" fill="#F1F2F4"/></svg>';
   const REGADOR = '<svg width="20" height="14" viewBox="0 0 20 14"><rect x="5" y="4" width="10" height="9" rx="2.5" fill="#8FA3B8"/><path d="M6 7L1 3" stroke="#8FA3B8" stroke-width="2.2" stroke-linecap="round"/><path d="M15 6q4 0 3 5" fill="none" stroke="#8FA3B8" stroke-width="1.8"/></svg>';
+  const FOLHA = '<svg width="10" height="8" viewBox="19 -5 10 8"><path d="M20 3C19-2 23-5 28-4 27 0 24 2 20 3Z" fill="#5FB873"/></svg>';
+  const BOLHA = '<svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="rgba(159,211,255,.18)" stroke="#9FD3FF" stroke-width="1.2"/><path d="M4 5a3.5 3.5 0 0 1 3-2" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".8"/></svg>';
   const BORBOLETA = '<svg width="14" height="12" viewBox="0 0 14 12"><ellipse cx="4" cy="4" rx="4" ry="3.6" fill="#F2A65A"/><ellipse cx="10" cy="4" rx="4" ry="3.6" fill="#F2A65A"/><ellipse cx="4.5" cy="9" rx="3" ry="2.6" fill="#FFD27A"/><ellipse cx="9.5" cy="9" rx="3" ry="2.6" fill="#FFD27A"/><rect x="6.3" y="2" width="1.4" height="9" rx=".7" fill="#3A2A1A"/></svg>';
 
   const reduz = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -243,7 +246,13 @@
   const doChao = bichos.filter((m) => m.trilha === chaoEl);
 
   // ---------- ações de um Broto só ----------
-  const DUR = { pulinhos: 1.2, espreguica: 1.7, olha: 2.2, danca: 2.2, cochilo: 3.5, espirro: 1.5, rega: 2.9, helice: 2.0, aceno: 2.0, acena: 2.4 };
+  const DUR = { pulinhos: 1.2, espreguica: 1.7, olha: 2.2, danca: 2.2, cochilo: 3.5, espirro: 1.5, rega: 2.9, helice: 2.0, aceno: 2.0, acena: 2.4, presente: 2.6, bolha: 3.2 };
+  // cada ação só se repete depois de um tempo (em segundos); cada Broto também espera entre uma ação e outra
+  const RECARGA = { pulinhos: 25, espreguica: 35, olha: 25, danca: 35, cochilo: 45, espirro: 40, borboleta: 50, rega: 60, helice: 50, presente: 60, acena: 30, bolha: 45 };
+  const pronto = new Map();
+  let agoraS = 0;
+  const disponivel = (n) => (pronto.get(n) || 0) <= agoraS;
+  const usa = (m, n) => { pronto.set(n, agoraS + (RECARGA[n] || 30)); m.proxAcao = agoraS + rnd(10, 18); };
   const limpa = (m) => {
     m.el.classList.remove("fecha", "vergonha", "acena");
     [m.folha, m.topete, m.mao, ...m.orelhas].forEach((n) => n && n.removeAttribute("transform"));
@@ -261,12 +270,13 @@
       { opacity: 1, transform: "rotate(-32deg)", offset: 0.3 }, { opacity: 1, transform: "rotate(-32deg)", offset: 0.8 },
       { opacity: 0, transform: "rotate(0deg)" }], 2800, "regador");
   };
-  const fimAcao = (m) => { limpa(m); m.estado = "parado"; m.espera = rnd(1.5, 4); };
+  const fimAcao = (m) => { limpa(m); m.estado = "parado"; m.espera = rnd(3, 6); };
   const sorteiaAcao = (m) => {
     const l = ["pulinhos", "espreguica", "olha", "danca", "cochilo", "espirro", "borboleta"];
-    if (m === B.broto) l.push("rega", "rega");
+    if (m === B.broto) l.push("rega", "rega", "presente", "presente");
     if (m === B.orelhudo) l.push("helice", "helice");
-    return l[Math.floor(Math.random() * l.length)];
+    const ok = l.filter(disponivel);
+    return ok.length ? ok[Math.floor(Math.random() * ok.length)] : null;
   };
   const iniciaCaca = (m) => {
     const [a, b] = m.faixa();
@@ -298,6 +308,39 @@
       const p = T / m.durA;
       m.chao = p > 0.15 && p < 0.85 ? -14 * Math.sin(Math.PI * (p - 0.15) / 0.7) : 0; m.y = m.chao; m.vy = 0;
     }
+    if (n === "presente") {
+      // B1 solta a folhinha, ela cai flutuando e outra nasce no lugar
+      if (!m.feito && T > 0.3) {
+        m.feito = true; m.sq = 0.3;
+        fx(m, FOLHA, 2, -28, [
+          { transform: "translate(0,0) rotate(0deg)", opacity: 1 },
+          { transform: "translate(9px, 7px) rotate(40deg)", offset: 0.3 },
+          { transform: "translate(-6px, 15px) rotate(-25deg)", offset: 0.6 },
+          { transform: "translate(5px, 24px) rotate(30deg)", opacity: 1, offset: 0.88 },
+          { transform: "translate(5px, 26px) rotate(30deg)", opacity: 0 }], 2200);
+      }
+      const k = T < 0.3 ? 1 : T < 1.2 ? 0 : suave((T - 1.2) / 0.9);
+      m.folha.setAttribute("transform", `translate(20 4) scale(${k.toFixed(3)}) translate(-20 -4)`);
+    }
+    if (n === "bolha") {
+      // B2 sai de trás do card, sopra uma bolha que sobe até o card de cima e estoura
+      m.x += ((T < 2.4 ? 6 : -14) - m.x) * Math.min(1, dt * 5);
+      if (T > 0.5 && T < 0.8) m.inclina = -8;
+      if (!m.feito && T > 0.8) {
+        m.feito = true; m.inclina = 0; m.sq = 0.5;
+        const slot = m.trilha, ant = slot.previousElementSibling, rs = slot.getBoundingClientRect();
+        const sobe = ant ? rs.top + rs.height / 2 - ant.getBoundingClientRect().bottom + 2 : 50;
+        const s2 = document.createElement("span"); s2.className = "fx"; s2.innerHTML = BOLHA;
+        s2.style.left = "auto"; s2.style.bottom = "auto"; s2.style.right = "-16px"; s2.style.top = "calc(50% - 16px)"; s2.style.zIndex = 2;
+        slot.appendChild(s2);
+        s2.animate([
+          { transform: "translate(0,0) scale(.3)", opacity: 0.6 },
+          { transform: `translate(-6px, ${-sobe * 0.45}px) scale(1)`, opacity: 1, offset: 0.35 },
+          { transform: `translate(-1px, ${-sobe * 0.8}px) scale(1.05)`, offset: 0.7 },
+          { transform: `translate(-7px, ${-sobe}px) scale(1.1)`, opacity: 1, offset: 0.9 },
+          { transform: `translate(-7px, ${-sobe}px) scale(1.7)`, opacity: 0 }], { duration: 1900, easing: "ease-out", fill: "forwards" }).onfinish = () => s2.remove();
+      }
+    }
     if (n === "aceno") m.mao.setAttribute("transform", `rotate(${(-25 + Math.sin(T * 14) * 30).toFixed(1)} 33 24)`);
     if (n === "acena") {
       m.x += (-14 - m.x) * Math.min(1, dt * 5);
@@ -307,13 +350,14 @@
   };
 
   // ---------- susto (toque e raio) ----------
-  let evento = null, proxEvento = rnd(20, 35);
+  let evento = null, proxEvento = rnd(25, 40);
   const encerra = (ev, exceto) => {
     ev.parts.forEach((p) => {
       p.evento = null; p.olharM = null; p.inclina = 0; p.el.style.zIndex = ""; p.chao = 0;
       if (p !== exceto && !["susto", "corre"].includes(p.estado)) { p.estado = "parado"; p.espera = rnd(1, 2.5); p.cansado = Math.max(p.cansado, 0.8); }
     });
-    if (evento === ev) { evento = null; proxEvento = rnd(25, 50); }
+    if (ev.corda) ev.corda.remove();
+    if (evento === ev) { evento = null; proxEvento = rnd(35, 60); }
   };
   const assusta = (m, x) => {
     if (m.evento) encerra(m.evento, m);
@@ -347,7 +391,7 @@
     return melhor;
   };
 
-  const ANDAM = ["anda", "corre", "feliz", "caca", "pega", "piramide", "cochicho"];
+  const ANDAM = ["anda", "corre", "feliz", "caca", "pega", "piramide", "cochicho", "cabo"];
   const passo = (m, dt, t) => {
     const [a, b] = m.faixa(), el = m.el, cl = el.classList;
     cl.toggle("dorme", ((noite() && m.estado === "parado") || (m.estado === "acao" && m.acao === "cochilo")) && !cl.contains("assustado"));
@@ -360,12 +404,14 @@
         if (perto && !m.apertado) { m.apertado = true; m.espera = Math.min(m.espera, rnd(0.8, 2)); }
         if ((m.espera -= dt) <= 0) {
           m.apertado = false;
+          const vez = agoraS >= (m.proxAcao || 0), r = Math.random();
           if (m.espia) {
-            if (m.x > -10 && Math.random() < 0.3) iniciaAcao(m, "acena");
+            if (vez && r < 0.25 && disponivel("bolha")) { usa(m, "bolha"); iniciaAcao(m, "bolha"); }
+            else if (vez && m.x > -10 && r < 0.5 && disponivel("acena")) { usa(m, "acena"); iniciaAcao(m, "acena"); }
             else { m.alvo = m.x > -10 ? (Math.random() < 0.5 ? -30 : -10) : 6; m.vmax = 30; m.estado = "anda"; }
-          } else if (!perto && Math.random() < 0.45) {
-            const n = sorteiaAcao(m);
-            if (n === "borboleta") iniciaCaca(m); else iniciaAcao(m, n);
+          } else if (!perto && vez && r < 0.45 && (m.prox = sorteiaAcao(m))) {
+            usa(m, m.prox);
+            if (m.prox === "borboleta") iniciaCaca(m); else iniciaAcao(m, m.prox);
           } else {
             m.alvo = escolheAlvo(m, a, b); m.assobia = Math.random() < 0.2;
             m.vmax = m.assobia ? rnd(13, 17) : rnd(20, 32); m.estado = "anda";
@@ -473,7 +519,7 @@
     if (m.estado === "briga" && m.briga) { const q = m.briga.outro.el.getBoundingClientRect(); tx = q.left + 22; ty = q.top + 30; }
     else if (m.olharM) { const q = m.olharM.el.getBoundingClientRect(); tx = q.left + 22; ty = q.top + 30; }
     else if (m.estado === "caca" && m.caca) { const q = m.caca.el.getBoundingClientRect(); tx = q.left + 7; ty = q.top + 6; }
-    else if (m.acao === "aceno" || m.acao === "acena") frente = true;
+    else if (m.acao === "aceno" || m.acao === "acena" || m.acao === "bolha") frente = true;
     const ox = tx - (r.left + r.width / 2), oy = ty - (r.top + r.height / 2), d = Math.hypot(ox, oy) || 1;
     const k = tx < -1e3 ? 0 : 1;
     m.olhos.style.transform = frente ? "translate(0px, 0.9px)" : `translate(${((ox / d) * 1.7 * k * Math.sign(m.f || 1)).toFixed(2)}px, ${((oy / d) * 1.3 * k).toFixed(2)}px)`;
@@ -498,6 +544,16 @@
       const ev = { tipo, parts: [A, Bo], A, B: Bo, fase: "vai", t: 0 };
       A.estado = Bo.estado = "cochicho"; A.evento = Bo.evento = ev;
       A.alvo = preso(Bo.x + lado * 26, a, b); A.vmax = 30; Bo.alvo = Bo.x;
+      A.olharM = Bo; Bo.olharM = A;
+      return ev;
+    }
+    if (tipo === "cabo") {
+      // cabo de guerra: dois ficam a ~70px um do outro e puxam uma cordinha
+      const [A, Bo] = (livres[0].x < livres[1].x ? [livres[0], livres[1]] : [livres[1], livres[0]]);
+      const xc = preso((A.x + Bo.x) / 2, a + 36, b - 36);
+      const ev = { tipo, parts: [A, Bo], A, B: Bo, fase: "vai", t: 0 };
+      A.alvo = preso(xc - 36, a, b); Bo.alvo = preso(xc + 36, a, b);
+      [A, Bo].forEach((p) => { p.estado = "cabo"; p.evento = ev; p.vmax = 34; });
       A.olharM = Bo; Bo.olharM = A;
       return ev;
     }
@@ -539,6 +595,37 @@
         if (!ev.ult || ev.t - ev.ult > 0.3) { ev.ult = ev.t; fx(A, PONTO, A.face * 10, -30, [{ transform: "translate(0,0)", opacity: 1 }, { transform: `translate(${A.face * 8}px, -4px)`, opacity: 0 }], 500); }
         if (ev.t > 1.3) { ev.fase = "surpresa"; ev.t = 0; A.inclina = Bo.inclina = 0; Bo.el.classList.add("assustado"); Bo.vy = -190; Bo.sq = -0.6; A.vy = -100; }
       } else if (ev.t > 0.9) { Bo.el.classList.remove("assustado"); encerra(ev); }
+    } else if (ev.tipo === "cabo") {
+      const { A, B: Bo } = ev;
+      if (ev.fase === "vai") {
+        if ([A, Bo].every((p) => Math.abs(p.x - p.alvo) < 1.5 && Math.abs(p.v) < 4)) {
+          ev.fase = "puxa"; ev.t = 0; A.estado = Bo.estado = "torre"; A.face = 1; Bo.face = -1;
+          ev.xa = A.x; ev.xb = Bo.x; ev.ganha = Math.random() < 0.5 ? A : Bo;
+          ev.corda = document.createElement("span"); ev.corda.className = "fx corda"; A.trilha.appendChild(ev.corda);
+        } else if (ev.t > 7) encerra(ev);
+      } else if (ev.fase === "puxa") {
+        // os dois se inclinam para trás e a corda vai e volta
+        const puxao = Math.sin(ev.t * 4.5) * 6 + (ev.ganha === A ? -1 : 1) * suave((ev.t - 1.4) / 1) * 8;
+        A.x = ev.xa + puxao; Bo.x = ev.xb + puxao;
+        A.inclina = Bo.inclina = -16 * suave(ev.t / 0.3) + Math.sin(ev.t * 30) * 2;
+        if (ev.t > 2.4) {
+          const perde = ev.ganha === A ? Bo : A, lado = ev.ganha === A ? -1 : 1;
+          ev.fase = "fim"; ev.t = 0; ev.perde = perde; ev.corda.remove(); ev.corda = null;
+          perde.v = lado * 70; perde.inclina = 0; ev.ganha.inclina = 0;
+          ev.ganha.v = -lado * 50; ev.ganha.vy = -170; ev.ganha.sq = -0.5;
+        }
+      } else {
+        // quem perdeu cai de cara para a frente e levanta; quem ganhou comemora
+        const q = ev.t < 0.25 ? suave(ev.t / 0.25) : ev.t < 1.0 ? 1 : 1 - suave((ev.t - 1.0) / 0.3);
+        ev.perde.inclina = 80 * q;
+        if (ev.t > 0.5 && ev.t < 0.6 && ev.ganha.vy === 0) { ev.ganha.vy = -150; ev.ganha.sq = -0.4; }
+        if (ev.t > 1.4) encerra(ev);
+      }
+      if (ev.corda) {
+        const ha = A.x + 22 + 12, hb = Bo.x + 22 - 12;
+        ev.corda.style.left = Math.min(ha, hb) + "px"; ev.corda.style.width = Math.abs(hb - ha) + "px";
+        ev.corda.style.transform = `translateY(${(Math.sin(ev.t * 9) * 1.2).toFixed(2)}px)`;
+      }
     } else {
       const { base, meio, topo } = ev;
       if (ev.fase === "junta") {
@@ -568,11 +655,15 @@
   const eventos = (dt) => {
     if (evento) return atualiza(evento, dt);
     if (noite() || chuva.fase !== "nada" || (proxEvento -= dt) > 0) return;
-    proxEvento = rnd(25, 50);
+    proxEvento = rnd(35, 60);
     const livres = doChao.filter(livre), opc = [];
-    if (livres.length >= 2) opc.push("pega", "cochicho");
+    if (livres.length >= 2) opc.push("pega", "cochicho", "cabo");
     if (livres.length === 3 && B.orelhudo && B.pilula && B.gota) opc.push("piramide");
-    if (opc.length) evento = comeca(opc[Math.floor(Math.random() * opc.length)], livres);
+    const ok = opc.filter((n) => disponivel("ev:" + n)); // cada brincadeira só se repete depois de 90s
+    if (!ok.length) return;
+    const n = ok[Math.floor(Math.random() * ok.length)];
+    pronto.set("ev:" + n, agoraS + 90);
+    evento = comeca(n, n === "cabo" ? livres.slice(0, 2) : livres);
   };
 
   // ---------- quem volta para a aba é recebido com aceno ----------
@@ -705,7 +796,7 @@
 
   let ant = performance.now();
   const loop = (agora) => {
-    const dt = Math.min(0.05, (agora - ant) / 1000), t = agora / 1000; ant = agora;
+    const dt = Math.min(0.05, (agora - ant) / 1000), t = agora / 1000; ant = agora; agoraS = t;
     brigas(t); eventos(dt); chover(dt, t);
     bichos.forEach((m) => passo(m, dt, t));
     requestAnimationFrame(loop);
