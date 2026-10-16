@@ -371,7 +371,7 @@
     const W = ceu.clientWidth, dpr = devicePixelRatio || 1;
     const vao = Math.max(40, Math.round(chaoEl.getBoundingClientRect().bottom - ultimo.getBoundingClientRect().bottom));
     if (vao !== H) { H = vao; ceu.style.height = H + "px"; }
-    BASE = Math.min(H - 12, 4 + 3 * (TILE + GAP));
+    BASE = Math.min(H - 12, 14 + 3 * (TILE + GAP)); // 14px de folga abaixo dos botões
     if (ceu.width !== Math.round(W * dpr) || ceu.height !== H * dpr) { ceu.width = Math.round(W * dpr); ceu.height = H * dpr; }
     const c = chuva;
     if (c.fase === "nada") {
