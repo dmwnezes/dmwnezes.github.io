@@ -160,6 +160,15 @@ dialog ul { margin: 0; padding-left: 20px; }
 dialog li { margin: 3px 0; }
 .pequeno { font-size: .88rem; color: var(--tinta-2); margin-top: 20px; }
 
+/* computador: tudo cabe na tela; só o painel rola por dentro */
+@media (min-width: 981px) {
+  body { height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+  .palco { flex: 1; min-height: 0; padding-bottom: 16px; }
+  .mapa-area { display: flex; flex-direction: column; min-height: 0; }
+  .mapa-titulo h1 { font-size: clamp(1.7rem, 2.6vw, 2.4rem); }
+  .mapa { flex: 1; height: auto; min-height: 0; }
+  .painel { position: static; max-height: 100%; }
+}
 @media (max-width: 980px) {
   .palco { grid-template-columns: 1fr; }
   .painel { position: static; max-height: none; }

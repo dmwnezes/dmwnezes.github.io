@@ -575,7 +575,8 @@ async function iniciar() {
   document.getElementById('abrir-fontes').onclick = abrirFontes;
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', desenhar);
   let tRes;
-  window.addEventListener('resize', () => { clearTimeout(tRes); tRes = setTimeout(() => { dimensionar(); desenhar(); }, 150); });
+  // o mapa muda de tamanho com a janela e com avisos que aparecem ou somem
+  new ResizeObserver(() => { clearTimeout(tRes); tRes = setTimeout(() => { dimensionar(); enquadrar(S.sel, 0); desenhar(); }, 150); }).observe(document.getElementById('mapa'));
 
   window.addEventListener('hashchange', () => {
     lerHash();
