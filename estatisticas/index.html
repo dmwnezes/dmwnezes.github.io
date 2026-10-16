@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retrato do Brasil</title>
+<meta name="description" content="Mapa interativo com estatísticas oficiais do Brasil, das regiões, dos estados e dos 5.570 municípios: população, PIB, IDH, renda, alfabetização, saneamento, segurança e eleições.">
+<meta property="og:title" content="Retrato do Brasil">
+<meta property="og:description" content="Estatísticas oficiais do Brasil num mapa: do país inteiro até o seu município.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23163a33'/%3E%3Crect x='7' y='17' width='4' height='8' fill='%23f2c14e'/%3E%3Crect x='14' y='11' width='4' height='14' fill='%2373c7b4'/%3E%3Crect x='21' y='6' width='4' height='19' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="./" aria-label="Retrato do Brasil, início">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8"/><rect x="7" y="17" width="4" height="8" class="b1"/><rect x="14" y="11" width="4" height="14" class="b2"/><rect x="21" y="6" width="4" height="19" class="b3"/></svg>
+    <span>Retrato do Brasil</span>
+  </a>
+  <label class="busca">
+    <span class="sr">Buscar estado ou município</span>
+    <input id="busca" type="search" placeholder="Buscar estado ou município" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="busca-lista">
+    <ul id="busca-lista" role="listbox" hidden></ul>
+  </label>
+  <button class="botao-fontes" id="abrir-fontes" type="button">Fontes</button>
+</header>
+
+<nav class="temas" id="temas" aria-label="Escolha o indicador"></nav>
+
+<main class="palco">
+  <section class="mapa-area" aria-label="Mapa">
+    <div class="mapa-titulo">
+      <h1 id="ind-nome">População</h1>
+      <p id="ind-desc"></p>
+    </div>
+    <div class="mapa" id="mapa">
+      <svg id="svg" role="img" aria-label="Mapa do Brasil colorido pelo indicador escolhido"></svg>
+      <div class="dica" id="dica" hidden></div>
+      <div class="carregando" id="carregando" hidden>Carregando municípios…</div>
+      <div class="zoom">
+        <button type="button" id="zoom-mais" aria-label="Aproximar">+</button>
+        <button type="button" id="zoom-menos" aria-label="Afastar">−</button>
+        <button type="button" id="zoom-br" aria-label="Ver o Brasil inteiro">BR</button>
+      </div>
+    </div>
+    <div class="rodape-mapa">
+      <div class="divisao" role="radiogroup" aria-label="Dividir o mapa por">
+        <button type="button" role="radio" data-div="regiao">Regiões</button>
+        <button type="button" role="radio" data-div="uf" aria-checked="true">Estados</button>
+        <button type="button" role="radio" data-div="mun">Municípios</button>
+      </div>
+      <div class="legenda" id="legenda"></div>
+    </div>
+    <p class="aviso" id="aviso" hidden></p>
+  </section>
+
+  <aside class="painel" id="painel" aria-live="polite"></aside>
+</main>
+
+<dialog id="fontes">
+  <form method="dialog"><button class="fechar" aria-label="Fechar">×</button></form>
+  <h2>De onde vêm os números</h2>
+  <p>Todos os dados são oficiais e públicos. O site guarda uma cópia para abrir rápido e, ao carregar, confere na API do IBGE se já saiu estimativa de população ou PIB mais recente.</p>
+  <div id="lista-fontes"></div>
+  <p class="pequeno">Projeto de <a href="https://dmwnezes.com">Daniel Menezes</a>. Código e scripts de atualização no <a href="https://github.com/dmwnezes/dmwnezes.github.io/tree/main/estatisticas">GitHub</a>.</p>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
