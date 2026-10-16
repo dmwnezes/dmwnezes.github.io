@@ -49,7 +49,7 @@
   .flag i.y { background: #E6C14F; } .flag i.b { background: #4A72CF; }
   @keyframes tremula { 0%, 100% { transform: translateY(-1.6px); } 50% { transform: translateY(1.6px); } }
   .avatar {
-    width: clamp(68px, 12.5vh, 104px); height: clamp(68px, 12.5vh, 104px); border-radius: 50%; object-fit: cover;
+    width: clamp(60px, 12vh, 104px); height: clamp(60px, 12vh, 104px); border-radius: 50%; object-fit: cover;
     box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--accent);
   }
   h1 { font-size: 22px; font-weight: 700; margin-top: clamp(10px, 2.2vh, 20px); }
@@ -75,51 +75,36 @@
   .i-bussola { background: #E6E3DD; }
   .i-cegas { background: #262A35; color: #D8B45A; font-size: 24px; font-weight: 700; }
 
-  footer { margin-top: auto; padding-top: clamp(16px, 3.5vh, 40px); font-size: 13px; color: var(--muted); }
+  footer { margin-top: auto; padding-top: clamp(32px, 5.5vh, 56px); font-size: 13px; color: var(--muted); }
   footer a { display: flex; align-items: center; gap: 10px; min-height: 44px; color: inherit; text-decoration: none; }
   footer a:hover, footer a:focus-visible { color: var(--text); outline: none; }
   .insta { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; }
   footer a:hover .insta, footer a:focus-visible .insta { background: var(--surface-high); box-shadow: 0 0 0 2px var(--accent); }
-  @media (prefers-reduced-motion: reduce) { .flag i, #b3, #b3 .corpo, .broto svg, .broto .sprout { animation: none !important; } .link, .arrow { transition: none; } .link:hover { transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .flag i { animation: none; } .link, .arrow { transition: none; } .link:hover { transform: none; } }
 
-  /* Broto: o mascote (M2). Fica pelo site e reage ao toque. */
+  /* Mascotes: 5 bichinhos de formas e cores diferentes. Andam, piscam, dormem de 0h a 5h e se assustam ao toque. */
   html, body { overflow-x: clip; }
   .slot { position: relative; }
   .slot .link { position: relative; z-index: 1; }
-  footer { position: relative; }
-  .broto {
-    position: absolute; width: 44px; height: 44px; padding: 0; border: 0; background: none;
-    display: grid; place-items: center; cursor: pointer; z-index: 2; -webkit-tap-highlight-color: transparent;
+  footer { position: relative; width: 100%; max-width: 440px; display: flex; justify-content: center; }
+  .trilha { position: absolute; left: 0; right: 0; height: 44px; pointer-events: none; }
+  .slot .trilha { bottom: 100%; margin-bottom: -2px; z-index: 2; }
+  .trilha.chao { bottom: 42px; z-index: 2; }
+  .trilha.chao::after { content: ""; position: absolute; left: 6px; right: 6px; bottom: 0; height: 3px; border-radius: 2px;
+    background: repeating-linear-gradient(90deg, #23272E 0 7px, transparent 7px 11px); }
+  .bicho {
+    position: absolute; left: 0; bottom: 0; width: 44px; height: 44px; padding: 0; border: 0; background: none;
+    display: flex; align-items: flex-end; justify-content: center; cursor: pointer; pointer-events: auto;
+    -webkit-tap-highlight-color: transparent; will-change: transform;
   }
-  .broto:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 12px; }
-  .broto .corpo { display: block; }
-  .broto svg { display: block; width: 26px; height: 33px; overflow: visible; transition: transform .25s ease; }
-  .broto .olhos { transition: transform .12s linear; }
-  .broto .closed, .broto .zzz { display: none; }
-  .broto.blink .open, .broto.sleep .open { display: none; }
-  .broto.blink .closed, .broto.sleep .closed, .broto.sleep .zzz { display: inline; }
-  .broto.pula svg { animation: pula .55s ease; }
-  .broto.gira .sprout { transform-box: fill-box; transform-origin: 0% 100%; animation: gira .7s ease; }
-  .broto.treme svg { animation: treme .4s linear; }
-  .broto.some svg { transform: scale(0); }
-  .bubble {
-    position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, 4px);
-    white-space: nowrap; background: var(--text); color: var(--bg); font: 600 12px Sora, system-ui, sans-serif;
-    padding: 6px 10px; border-radius: 12px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
-  }
-  .bubble.on { opacity: 1; transform: translate(-50%, -2px); }
-  #b1 { right: 56px; top: -37px; }
-  #b2 { right: -24px; top: 50%; margin-top: -22px; z-index: 0; }
-  #b2 svg { transform: rotate(14deg); }
-  #b2 .bubble { left: auto; right: 0; transform: translate(0, 4px); }
-  #b2 .bubble.on { transform: translate(0, -2px); }
-  #b3 { left: -54px; bottom: 0; animation: passeio 10s ease-in-out infinite; }
-  #b3 .corpo { animation: vira 10s steps(1) infinite; }
-  @keyframes passeio { 0%, 100% { transform: translateX(0); } 45%, 50% { transform: translateX(-34px); } }
-  @keyframes vira { 0% { transform: scaleX(-1); } 50% { transform: scaleX(1); } }
-  @keyframes pula { 0%, 100% { transform: none; } 20% { transform: scale(1.15, .85); } 50% { transform: translateY(-14px) scale(.95, 1.05); } 80% { transform: scale(1.1, .9); } }
-  @keyframes gira { to { transform: rotate(360deg); } }
-  @keyframes treme { 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
+  .bicho:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 12px; }
+  .bicho svg { display: block; width: 28px; height: 31.5px; overflow: visible; }
+  .bicho .tronco, .bicho .pe { transform-box: fill-box; transform-origin: 50% 100%; }
+  .bicho .fechado, .bicho .susto, .bicho .zzz { display: none; }
+  .bicho.pisca .olhos, .bicho.dorme .olhos, .bicho.assustado .olhos, .bicho.assustado .fechado { display: none; }
+  .bicho.pisca .fechado, .bicho.dorme .fechado, .bicho.dorme .zzz, .bicho.assustado .susto { display: inline; }
+  .bicho.espia { left: auto; right: -22px; top: 50%; bottom: auto; margin-top: -22px; z-index: 0; }
+  .bicho.espia svg { transform: rotate(14deg); }
 </style>
 </head>
 <body>
@@ -132,6 +117,7 @@
 
 <main>
   <div class="slot">
+  <div class="trilha" data-faixa="card"><button class="bicho" type="button" data-forma="broto" aria-label="Mascote Broto"></button></div>
   <a class="link" href="/termo/">
     <span class="ico i-palavreiro" aria-hidden="true">
       <i style="background:#5FB873"></i><i style="background:#E6C14F"></i><i style="background:#5FB873"></i><i style="background:#3A3363"></i>
@@ -139,20 +125,10 @@
     <span class="txt"><b>Palavreiro</b><small>Jogos de palavras</small></span>
     <span class="arrow" aria-hidden="true">→</span>
   </a>
-  <button class="broto" id="b1" type="button" aria-label="Broto, o mascote. Toque para interagir">
-    <span class="corpo"><svg viewBox="0 -6 40 50" aria-hidden="true">
-      <g class="sprout"><path d="M20 3 C19 -2 23 -5 28 -4 C27 0 24 2 20 3Z" fill="#5FB873"/><path d="M20 3V0" stroke="#3E8A50" stroke-width="1.6" stroke-linecap="round"/></g>
-      <rect x="9" y="34" width="7" height="6" rx="3" fill="#B8962F"/><rect x="24" y="34" width="7" height="6" rx="3" fill="#B8962F"/>
-      <rect x="2" y="2" width="36" height="34" rx="11" fill="#E6C14F"/>
-      <circle cx="9" cy="25" r="3" fill="#F2A0A0" opacity=".85"/><circle cx="31" cy="25" r="3" fill="#F2A0A0" opacity=".85"/>
-      <g class="open"><g class="olhos"><circle cx="14" cy="18" r="2.7" fill="#101216"/><circle cx="26" cy="18" r="2.7" fill="#101216"/></g></g>
-      <path class="closed" d="M10 17q4 3.5 8 0M22 17q4 3.5 8 0" fill="none" stroke="#101216" stroke-width="2.2" stroke-linecap="round"/>
-      <g class="zzz" fill="#9AA0AA" font-family="Sora, sans-serif" font-weight="700"><text x="31" y="0" font-size="8">z</text><text x="35" y="-4" font-size="6">z</text></g>
-    </svg></span><span class="bubble" aria-live="polite"></span>
-  </button>
   </div>
 
   <div class="slot">
+  <button class="bicho espia" type="button" data-forma="bola" aria-label="Mascote Bolinha"></button>
   <a class="link" href="/politica/">
     <span class="ico i-bussola" aria-hidden="true">
       <svg width="34" height="34" viewBox="0 0 96 96" fill="none"><circle cx="48" cy="48" r="38" stroke="#2B2A27" stroke-width="6"/><path d="M48 48 63 29 52 52Z" fill="#9C7A45"/><path d="M48 48 33 67 44 44Z" fill="#8A857C"/></svg>
@@ -160,17 +136,6 @@
     <span class="txt"><b>Bússola Política</b><small>Descubra sua posição</small></span>
     <span class="arrow" aria-hidden="true">→</span>
   </a>
-  <button class="broto espia" id="b2" type="button" aria-label="Broto, o mascote. Toque para interagir">
-    <span class="corpo"><svg viewBox="0 -6 40 50" aria-hidden="true">
-      <g class="sprout"><path d="M20 3 C19 -2 23 -5 28 -4 C27 0 24 2 20 3Z" fill="#5FB873"/><path d="M20 3V0" stroke="#3E8A50" stroke-width="1.6" stroke-linecap="round"/></g>
-      <rect x="9" y="34" width="7" height="6" rx="3" fill="#B8962F"/><rect x="24" y="34" width="7" height="6" rx="3" fill="#B8962F"/>
-      <rect x="2" y="2" width="36" height="34" rx="11" fill="#E6C14F"/>
-      <circle cx="9" cy="25" r="3" fill="#F2A0A0" opacity=".85"/><circle cx="31" cy="25" r="3" fill="#F2A0A0" opacity=".85"/>
-      <g class="open"><g class="olhos"><circle cx="14" cy="18" r="2.7" fill="#101216"/><circle cx="26" cy="18" r="2.7" fill="#101216"/></g></g>
-      <path class="closed" d="M10 17q4 3.5 8 0M22 17q4 3.5 8 0" fill="none" stroke="#101216" stroke-width="2.2" stroke-linecap="round"/>
-      <g class="zzz" fill="#9AA0AA" font-family="Sora, sans-serif" font-weight="700"><text x="31" y="0" font-size="8">z</text><text x="35" y="-4" font-size="6">z</text></g>
-    </svg></span><span class="bubble" aria-live="polite"></span>
-  </button>
   </div>
 
   <div class="slot">
@@ -183,60 +148,120 @@
 </main>
 
 <footer>
-  <button class="broto passeia" id="b3" type="button" aria-label="Broto, o mascote. Toque para interagir">
-    <span class="corpo"><svg viewBox="0 -6 40 50" aria-hidden="true">
-      <g class="sprout"><path d="M20 3 C19 -2 23 -5 28 -4 C27 0 24 2 20 3Z" fill="#5FB873"/><path d="M20 3V0" stroke="#3E8A50" stroke-width="1.6" stroke-linecap="round"/></g>
-      <rect x="9" y="34" width="7" height="6" rx="3" fill="#B8962F"/><rect x="24" y="34" width="7" height="6" rx="3" fill="#B8962F"/>
-      <rect x="2" y="2" width="36" height="34" rx="11" fill="#E6C14F"/>
-      <circle cx="9" cy="25" r="3" fill="#F2A0A0" opacity=".85"/><circle cx="31" cy="25" r="3" fill="#F2A0A0" opacity=".85"/>
-      <g class="open"><g class="olhos"><circle cx="14" cy="18" r="2.7" fill="#101216"/><circle cx="26" cy="18" r="2.7" fill="#101216"/></g></g>
-      <path class="closed" d="M10 17q4 3.5 8 0M22 17q4 3.5 8 0" fill="none" stroke="#101216" stroke-width="2.2" stroke-linecap="round"/>
-      <g class="zzz" fill="#9AA0AA" font-family="Sora, sans-serif" font-weight="700"><text x="31" y="0" font-size="8">z</text><text x="35" y="-4" font-size="6">z</text></g>
-    </svg></span><span class="bubble" aria-live="polite"></span>
-  </button>
+  <div class="trilha chao" data-faixa="chao"><button class="bicho" type="button" data-forma="gota" aria-label="Mascote Gota"></button><button class="bicho" type="button" data-forma="pilula" aria-label="Mascote Pílula"></button><button class="bicho" type="button" data-forma="orelhudo" aria-label="Mascote Orelhudo"></button></div>
   <a href="https://instagram.com/dmwnezes" target="_blank" rel="noopener">
   <span class="insta" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F1F2F4" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></span>
   criado por: @dmwnezes
 </a></footer>
 <script>
-// Broto: olhos seguem o dedo/mouse, pisca sozinho, dorme de 0h a 5h e reage ao toque.
+// Mascotes: movimento suave por física simples (aceleração, passo, respiração), olhar que segue o dedo e susto ao toque.
 (() => {
-  const brotos = [...document.querySelectorAll(".broto")];
-  const falas = ["oi!", "bora um Termo?", "tô de olho em você", "psiu!", "me rega, por favor", "BROTO tem 5 letras", "Vai, Fortaleza!", "cuidado, eu mordo", "já votou às cegas?"];
-  const dormindo = () => new Date().getHours() < 5;
-  const anim = (b, cls, ms) => { b.classList.remove(cls); void b.offsetWidth; b.classList.add(cls); setTimeout(() => b.classList.remove(cls), ms); };
-  const fala = (b, txt) => {
-    const el = b.querySelector(".bubble"); el.textContent = txt; el.classList.add("on");
-    clearTimeout(b._fala); b._fala = setTimeout(() => el.classList.remove("on"), 1800);
+  const F = {
+    broto: { pe: "#B8962F", o: [14, 19, 26, 19], c: '<path d="M20 4C19-1 23-4 28-3 27 1 24 3 20 4Z" fill="#5FB873"/><rect x="2" y="4" width="36" height="32" rx="11" fill="#E6C14F"/><circle cx="8.5" cy="26" r="3" fill="#F2A0A0" opacity=".85"/><circle cx="31.5" cy="26" r="3" fill="#F2A0A0" opacity=".85"/>' },
+    bola: { pe: "#4A72CF", o: [14, 18, 26, 18], c: '<path d="M20 4q2-6 7-5" fill="none" stroke="#6F95E6" stroke-width="2.4" stroke-linecap="round"/><circle cx="20" cy="20" r="16" fill="#6F95E6"/>' },
+    gota: { pe: "#3E8A50", o: [14, 24, 26, 24], c: '<path d="M20 0C27 9 37 16 37 24A17 13 0 0 1 3 24C3 16 13 9 20 0Z" fill="#5FB873"/>' },
+    pilula: { pe: "#93B84A", o: [13, 23, 27, 23], c: '<rect x="0" y="12" width="40" height="24" rx="12" fill="#C6F36B"/>' },
+    orelhudo: { pe: "#6E5FD0", o: [15, 20, 25, 20], c: '<rect x="8" y="-2" width="6" height="14" rx="3" fill="#9B8CFF"/><rect x="26" y="-2" width="6" height="14" rx="3" fill="#9B8CFF"/><rect x="5" y="6" width="30" height="30" rx="10" fill="#9B8CFF"/>' }
   };
-  brotos.forEach((b) => {
-    b._toques = 0;
-    b.classList.toggle("sleep", dormindo());
-    (function piscar() {
-      setTimeout(() => { if (!b.classList.contains("sleep")) anim(b, "blink", 160); piscar(); }, 2500 + Math.random() * 4000);
-    })();
-    b.addEventListener("click", () => {
-      if (b.classList.contains("sleep")) {
-        b.classList.remove("sleep"); anim(b, "pula", 550); fala(b, "hã? tô acordado!");
-        setTimeout(() => b.classList.toggle("sleep", dormindo()), 5000); return;
-      }
-      b._toques++; clearTimeout(b._zera); b._zera = setTimeout(() => (b._toques = 0), 2500);
-      if (b._toques >= 5) {
-        b._toques = 0; fala(b, "chega! vou me esconder"); anim(b, "treme", 400);
-        setTimeout(() => b.classList.add("some"), 600);
-        setTimeout(() => { b.classList.remove("some"); fala(b, "voltei :)"); }, 3500); return;
-      }
-      anim(b, ["pula", "gira", "pula", "treme"][Math.floor(Math.random() * 4)], 700);
-      fala(b, falas[Math.floor(Math.random() * falas.length)]);
+  const desenho = (f) => { const [a, b, c, d] = f.o; return `<svg viewBox="-4 -10 48 54" aria-hidden="true">
+    <rect class="pe" x="9" y="34" width="7" height="6" rx="3" fill="${f.pe}"/><rect class="pe" x="24" y="34" width="7" height="6" rx="3" fill="${f.pe}"/>
+    <g class="tronco">${f.c}
+      <g class="olhos" fill="#101216"><circle cx="${a}" cy="${b}" r="2.6"/><circle cx="${c}" cy="${d}" r="2.6"/></g>
+      <path class="fechado" d="M${a - 4} ${b}q4 3.5 8 0M${c - 4} ${d}q4 3.5 8 0" fill="none" stroke="#101216" stroke-width="2.2" stroke-linecap="round"/>
+      <g class="susto" fill="#101216"><circle cx="${a}" cy="${b}" r="4.6" fill="#fff"/><circle cx="${c}" cy="${d}" r="4.6" fill="#fff"/><circle cx="${a}" cy="${b}" r="1.5"/><circle cx="${c}" cy="${d}" r="1.5"/><ellipse cx="20" cy="${b + 8}" rx="2.2" ry="2.8"/><path d="M38 0q3 4 0 6.5q-3-2.5 0-6.5Z" fill="#9FD3FF"/></g>
+      <g class="zzz" fill="#9AA0AA" font-family="Sora,sans-serif" font-weight="700"><text x="33" y="-2" font-size="8">z</text><text x="38" y="-7" font-size="6">z</text></g>
+    </g></svg>`; };
+  const reduz = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const noite = () => new Date().getHours() < 5;
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  let px = -1e4, py = -1e4;
+  addEventListener("pointermove", (e) => { px = e.clientX; py = e.clientY; }, { passive: true });
+
+  const bichos = [...document.querySelectorAll(".bicho")].map((el, i) => {
+    el.innerHTML = desenho(F[el.dataset.forma]);
+    const espia = el.classList.contains("espia"), trilha = el.parentElement;
+    const faixa = () => {
+      if (espia) return [-30, 6];
+      const w = trilha.clientWidth;
+      return trilha.dataset.faixa === "card" ? [w * 0.42, w - 52] : [0, w - 44];
+    };
+    const [a, b] = faixa();
+    const m = { el, espia, faixa, svg: el.querySelector("svg"), tronco: el.querySelector(".tronco"), pes: el.querySelectorAll(".pe"), olhos: el.querySelector(".olhos"),
+      x: espia ? 6 : a + (b - a) * [0.7, 0.15, 0.5, 0.85][i % 4], alvo: 0, v: 0, vmax: 26, f: 1, face: 1, fase: rnd(0, 6), y: 0, vy: 0, sq: 0,
+      estado: "parado", espera: rnd(0.5, 3), tS: 0, pulou: false, cansado: 0, fugaX: 0 };
+    m.alvo = m.x;
+    el.addEventListener("click", (e) => {
+      if (m.estado === "susto" || m.estado === "corre") return;
+      if (reduz) { el.classList.add("assustado"); setTimeout(() => el.classList.remove("assustado"), 700); return; }
+      el.classList.remove("dorme", "pisca"); el.classList.add("assustado");
+      m.estado = "susto"; m.tS = 0; m.pulou = false; m.sq = 0.6; m.fugaX = e.clientX;
     });
+    (function piscar() { setTimeout(() => { if (!el.classList.contains("dorme") && !el.classList.contains("assustado")) { el.classList.add("pisca"); setTimeout(() => el.classList.remove("pisca"), 150); } piscar(); }, rnd(2200, 6000)); })();
+    return m;
   });
-  addEventListener("pointermove", (e) => {
-    brotos.forEach((b) => {
-      const r = b.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
-      const d = Math.hypot(dx, dy) || 1;
-      b.querySelector(".olhos").style.transform = `translate(${(dx / d) * 1.8}px, ${(dy / d) * 1.4}px)`;
-    });
-  }, { passive: true });
+
+  const passo = (m, dt, t) => {
+    const [a, b] = m.faixa(), el = m.el;
+    el.classList.toggle("dorme", noite() && m.estado === "parado" && !el.classList.contains("assustado"));
+    if (m.estado === "parado") {
+      if (m.cansado > 0) m.cansado -= dt;
+      else if (!el.classList.contains("dorme") && (m.espera -= dt) <= 0) {
+        if (m.espia) { m.alvo = m.x > -10 ? (Math.random() < 0.5 ? -30 : -10) : 6; m.vmax = 30; }
+        else { let n; do n = rnd(a, b); while (Math.abs(n - m.x) < 30 && b - a > 60); m.alvo = n; m.vmax = rnd(20, 32); }
+        m.estado = "anda";
+      }
+    } else if (m.estado === "susto") {
+      m.tS += dt;
+      if (!m.pulou && m.tS > 0.12) { m.pulou = true; m.vy = -190; m.sq = -0.7; }
+      if (m.pulou && m.y === 0 && m.tS > 0.3) {
+        const r = el.getBoundingClientRect(), cx = r.left + r.width / 2;
+        m.alvo = m.espia ? -30 : (m.fugaX < cx ? b : a); m.vmax = m.espia ? 150 : 165; m.estado = "corre";
+      }
+    }
+    if (m.estado === "anda" || m.estado === "corre") {
+      const dx = m.alvo - m.x, quer = Math.sign(dx) * Math.min(m.vmax, Math.abs(dx) * 3.5);
+      m.v += (quer - m.v) * Math.min(1, dt * (m.estado === "corre" ? 9 : 4));
+      if (Math.abs(dx) < 0.6 && Math.abs(m.v) < 3) {
+        m.x = m.alvo; m.v = 0;
+        if (m.estado === "corre") {
+          m.cansado = m.espia ? 2.5 : 1.4;
+          setTimeout(() => el.classList.remove("assustado"), m.espia ? 2400 : 900);
+          if (m.espia) { m.espera = 0; }
+        }
+        m.estado = "parado"; m.espera = m.espia ? rnd(2, 4) : rnd(1.5, 4.5);
+      }
+    }
+    m.x += m.v * dt;
+    // pulo com gravidade e amassadinho na aterrissagem
+    if (m.vy || m.y < 0) { m.vy += 1100 * dt; m.y += m.vy * dt; if (m.y >= 0) { m.y = 0; m.vy = 0; m.sq = 0.55; } }
+    m.sq *= Math.exp(-dt * 9);
+    const vel = Math.abs(m.v), anda = Math.min(1, vel / 28);
+    if (!m.espia && vel > 4) m.face = Math.sign(m.v);
+    m.f += (m.face - m.f) * Math.min(1, dt * 10);
+    m.fase += dt * (5 + vel * 0.22);
+    const s = Math.sin(m.fase);
+    const resp = (1 - anda) * (m.cansado > 0 ? Math.sin(t * 11) * 0.05 : Math.sin(t * 2.4) * 0.022);
+    const bob = -Math.abs(s) * 2.4 * anda, incl = s * 4 * anda + Math.min(12, vel * 0.07);
+    const treme = m.estado === "susto" && !m.pulou ? Math.sin(t * 90) * 1.3 : 0;
+    const sx = 1 + m.sq * 0.2 - resp, sy = 1 - m.sq * 0.2 + resp;
+    el.style.transform = `translate(${(m.x + treme).toFixed(2)}px, ${m.y.toFixed(2)}px)`;
+    m.svg.style.transform = (m.espia ? "rotate(14deg) " : "") + `scaleX(${m.f.toFixed(3)})`;
+    m.tronco.style.transform = `translateY(${bob.toFixed(2)}px) rotate(${incl.toFixed(2)}deg) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`;
+    m.pes[0].style.transform = `translateY(${(-Math.max(0, s) * 2.6 * anda).toFixed(2)}px)`;
+    m.pes[1].style.transform = `translateY(${(-Math.max(0, -s) * 2.6 * anda).toFixed(2)}px)`;
+    const r = el.getBoundingClientRect(), ox = px - (r.left + r.width / 2), oy = py - (r.top + r.height / 2), d = Math.hypot(ox, oy) || 1;
+    const k = px < -1e3 ? 0 : 1;
+    m.olhos.style.transform = `translate(${((ox / d) * 1.7 * k * Math.sign(m.f || 1)).toFixed(2)}px, ${((oy / d) * 1.3 * k).toFixed(2)}px)`;
+  };
+
+  let ant = performance.now();
+  const loop = (agora) => {
+    const dt = Math.min(0.05, (agora - ant) / 1000); ant = agora;
+    bichos.forEach((m) => passo(m, dt, agora / 1000));
+    requestAnimationFrame(loop);
+  };
+  if (reduz) bichos.forEach((m) => { m.el.style.transform = `translateX(${m.x}px)`; m.el.classList.toggle("dorme", noite()); });
+  else requestAnimationFrame(loop);
 })();
 </script>
 </body>
