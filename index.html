@@ -2,22 +2,114 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Palavreiro</title>
-<meta name="description" content="Termo, Dueto, Quarteto e mais de 15 jogos de palavras em português, sozinho ou com amigos.">
-<!-- Prévia do link: quem compartilha dmwnezes.com (sem /termo) vê a mesma imagem do Palavreiro; robôs não seguem o redirecionamento. -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dmwnezes — projetos</title>
+<meta name="description" content="Projetos de @dmwnezes: Palavreiro, Bússola Política e Propostas às Cegas.">
+<meta name="theme-color" content="#101216">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Palavreiro">
-<meta property="og:title" content="Palavreiro">
-<meta property="og:description" content="Termo, Dueto, Quarteto e mais de 15 jogos de palavras em português, sozinho ou com amigos.">
-<meta property="og:url" content="https://dmwnezes.com/termo/">
-<meta property="og:image" content="https://dmwnezes.com/termo/img/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<!-- dmwnezes.com é o Palavreiro: a raiz só leva para /termo/ (mantendo ?mp=, ?d= e #rota). -->
-<meta http-equiv="refresh" content="0; url=/termo/">
-<link rel="canonical" href="https://dmwnezes.com/termo/">
-<script>location.replace("/termo/" + location.search + location.hash);</script>
+<meta property="og:site_name" content="dmwnezes">
+<meta property="og:title" content="dmwnezes — projetos">
+<meta property="og:description" content="Palavreiro, Bússola Política e Propostas às Cegas, num lugar só.">
+<meta property="og:url" content="https://dmwnezes.com/">
+<meta property="og:image" content="https://dmwnezes.com/img/criador.jpg">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://dmwnezes.com/">
+<script>
+  // Links antigos do Palavreiro na raiz (?mp=, ?d=, #rota) continuam indo para /termo/.
+  if (/[?&](mp|d)=/.test(location.search) || location.hash.length > 1) {
+    location.replace("/termo/" + location.search + location.hash);
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #101216; --surface: #1B1E24; --surface-high: #242830;
+    --text: #F1F2F4; --muted: #9AA0AA; --accent: #C6F36B;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html { background: var(--bg); }
+  body {
+    min-height: 100vh; min-height: 100dvh;
+    font-family: Sora, system-ui, sans-serif; color: var(--text); background: var(--bg);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 56px 16px 28px;
+  }
+  .avatar {
+    width: 104px; height: 104px; border-radius: 50%; object-fit: cover;
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--accent);
+  }
+  h1 { font-size: 22px; font-weight: 700; margin-top: 20px; }
+  .sub { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+  main { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 12px; margin-top: 32px; }
+  .link {
+    display: flex; align-items: center; gap: 14px; padding: 14px;
+    border-radius: 22px; background: var(--surface); color: inherit; text-decoration: none;
+    transition: transform .2s ease, background .2s ease;
+  }
+  .link:hover, .link:focus-visible { background: var(--surface-high); transform: translateY(-2px); outline: none; }
+  .link:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+  .ico { flex: none; width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; }
+  .txt { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .txt b { font-size: 16px; font-weight: 600; }
+  .txt small { font-size: 13px; color: var(--muted); }
+  .arrow { color: var(--accent); font-size: 20px; transition: transform .2s ease; }
+  .link:hover .arrow { transform: translateX(3px); }
+
+  .i-palavreiro { background: #2A2058; grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 10px; }
+  .i-palavreiro i { border-radius: 4px; width: 100%; height: 100%; }
+  .i-bussola { background: #E6E3DD; }
+  .i-cegas { background: #262A35; color: #D8B45A; font-size: 24px; font-weight: 700; }
+
+  .insta {
+    margin-top: 24px; width: 48px; height: 48px; border-radius: 50%;
+    background: var(--surface); display: grid; place-items: center;
+  }
+  .insta:hover, .insta:focus-visible { background: var(--surface-high); outline: none; box-shadow: 0 0 0 2px var(--accent); }
+
+  footer { margin-top: auto; padding-top: 40px; font-size: 13px; color: var(--muted); }
+  footer a { color: inherit; text-decoration: none; }
+  footer a:hover { color: var(--text); }
+  @media (prefers-reduced-motion: reduce) { .link, .arrow { transition: none; } .link:hover { transform: none; } }
+</style>
 </head>
-<body><a href="/termo/">Abrir o Palavreiro</a></body>
+<body>
+<header style="display:flex;flex-direction:column;align-items:center;text-align:center">
+  <img class="avatar" src="/img/criador.jpg" alt="Foto de Daniel Menezes" width="104" height="104">
+  <h1>Daniel Menezes</h1>
+  <p class="sub">@dmwnezes · jogos e ferramentas</p>
+</header>
+
+<main>
+  <a class="link" href="/termo/">
+    <span class="ico i-palavreiro" aria-hidden="true">
+      <i style="background:#5FB873"></i><i style="background:#E6C14F"></i><i style="background:#5FB873"></i><i style="background:#3A3363"></i>
+    </span>
+    <span class="txt"><b>Palavreiro</b><small>Jogos de palavras</small></span>
+    <span class="arrow" aria-hidden="true">→</span>
+  </a>
+
+  <a class="link" href="/politica/">
+    <span class="ico i-bussola" aria-hidden="true">
+      <svg width="34" height="34" viewBox="0 0 96 96" fill="none"><circle cx="48" cy="48" r="38" stroke="#2B2A27" stroke-width="6"/><path d="M48 48 63 29 52 52Z" fill="#9C7A45"/><path d="M48 48 33 67 44 44Z" fill="#8A857C"/></svg>
+    </span>
+    <span class="txt"><b>Bússola Política</b><small>Descubra sua posição</small></span>
+    <span class="arrow" aria-hidden="true">→</span>
+  </a>
+
+  <a class="link" href="/candidatos/">
+    <span class="ico i-cegas" aria-hidden="true">?</span>
+    <span class="txt"><b>Propostas às Cegas</b><small>Presidência 2026</small></span>
+    <span class="arrow" aria-hidden="true">→</span>
+  </a>
+</main>
+
+<a class="insta" href="https://instagram.com/dmwnezes" target="_blank" rel="noopener" aria-label="Instagram @dmwnezes">
+  <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F1F2F4" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+</a>
+
+<footer><a href="https://instagram.com/dmwnezes" target="_blank" rel="noopener">criado por: @dmwnezes</a></footer>
+</body>
 </html>
