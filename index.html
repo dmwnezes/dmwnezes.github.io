@@ -114,6 +114,13 @@
   .bicho.amor .coracao { display: inline; }
   .bicho.amor .coracao path { transform-box: fill-box; transform-origin: center; animation: bate .45s ease-in-out infinite; }
   @keyframes bate { 50% { transform: scale(1.3); } }
+  .bicho .rubor, .bicho .mao { display: none; }
+  .bicho.vergonha .rubor, .bicho.acena .mao { display: inline; }
+  .fx { position: absolute; left: 0; bottom: 0; pointer-events: none; z-index: 3; line-height: 0; }
+  .fx svg { display: block; }
+  .regador { transform-origin: 75% 60%; }
+  .borboleta svg { animation: asa .15s ease-in-out infinite alternate; }
+  @keyframes asa { to { transform: scaleX(.3); } }
   .bicho.espia { left: auto; right: -22px; top: 50%; bottom: auto; margin-top: -22px; z-index: 0; }
   .bicho.espia svg { transform: rotate(14deg); }
 </style>
@@ -165,37 +172,52 @@
   criado por: @dmwnezes
 </a></footer>
 <script>
-// Mascotes: movimento suave por física simples (aceleração, passo, respiração), olhar que segue o dedo e susto ao toque.
+// Brotos (B1–B5): mascotes do hub. Física simples (aceleração, passo, respiração), olhar que segue o dedo,
+// ações aleatórias, brincadeiras em grupo no rodapé, chuva com raios e susto ao toque.
 (() => {
   const F = {
-    broto: { topo: 4, pe: "#B8962F", o: [14, 19, 26, 19], c: '<path d="M20 4C19-1 23-4 28-3 27 1 24 3 20 4Z" fill="#5FB873"/><rect x="2" y="4" width="36" height="32" rx="11" fill="#E6C14F"/><circle cx="8.5" cy="26" r="3" fill="#F2A0A0" opacity=".85"/><circle cx="31.5" cy="26" r="3" fill="#F2A0A0" opacity=".85"/>' },
-    bola: { topo: 4, pe: "#4A72CF", o: [14, 18, 26, 18], c: '<path d="M20 4q2-6 7-5" fill="none" stroke="#6F95E6" stroke-width="2.4" stroke-linecap="round"/><circle cx="20" cy="20" r="16" fill="#6F95E6"/>' },
+    broto: { topo: 4, pe: "#B8962F", o: [14, 19, 26, 19], c: '<path class="folha" d="M20 4C19-1 23-4 28-3 27 1 24 3 20 4Z" fill="#5FB873"/><rect x="2" y="4" width="36" height="32" rx="11" fill="#E6C14F"/><circle cx="8.5" cy="26" r="3" fill="#F2A0A0" opacity=".85"/><circle cx="31.5" cy="26" r="3" fill="#F2A0A0" opacity=".85"/>' },
+    bola: { topo: 4, pe: "#4A72CF", o: [14, 18, 26, 18], c: '<path class="topete" d="M20 4q2-6 7-5" fill="none" stroke="#6F95E6" stroke-width="2.4" stroke-linecap="round"/><circle cx="20" cy="20" r="16" fill="#6F95E6"/>' },
     gota: { topo: 0, pe: "#3E8A50", o: [14, 24, 26, 24], c: '<path d="M20 0C27 9 37 16 37 24A17 13 0 0 1 3 24C3 16 13 9 20 0Z" fill="#5FB873"/>' },
     pilula: { topo: 12, pe: "#93B84A", o: [13, 23, 27, 23], c: '<rect x="0" y="12" width="40" height="24" rx="12" fill="#C6F36B"/>' },
-    orelhudo: { topo: 6, pe: "#6E5FD0", o: [15, 20, 25, 20], c: '<rect x="8" y="-2" width="6" height="14" rx="3" fill="#9B8CFF"/><rect x="26" y="-2" width="6" height="14" rx="3" fill="#9B8CFF"/><rect x="5" y="6" width="30" height="30" rx="10" fill="#9B8CFF"/>' }
+    orelhudo: { topo: 6, pe: "#6E5FD0", o: [15, 20, 25, 20], c: '<rect class="orelha" x="8" y="-2" width="6" height="14" rx="3" fill="#9B8CFF"/><rect class="orelha" x="26" y="-2" width="6" height="14" rx="3" fill="#9B8CFF"/><rect x="5" y="6" width="30" height="30" rx="10" fill="#9B8CFF"/>' }
   };
   const desenho = (f) => { const [a, b, c, d] = f.o; return `<svg viewBox="-4 -10 48 54" aria-hidden="true">
     <rect class="pe" x="9" y="34" width="7" height="6" rx="3" fill="${f.pe}"/><rect class="pe" x="24" y="34" width="7" height="6" rx="3" fill="${f.pe}"/>
     <g class="tronco">${f.c}
+      <g class="mao"><circle cx="39" cy="21" r="3.6" fill="${f.pe}"/></g>
+      <g class="rubor" fill="#F2A0A0"><ellipse cx="${a - 1}" cy="${b + 5}" rx="3.2" ry="1.9"/><ellipse cx="${c + 1}" cy="${d + 5}" rx="3.2" ry="1.9"/></g>
       <g class="olhos" fill="#101216"><circle cx="${a}" cy="${b}" r="2.6"/><circle cx="${c}" cy="${d}" r="2.6"/></g>
       <g class="coracao" fill="#FF5C7A">${[[a, b], [c, d]].map(([x, y]) => `<path d="M${x} ${y + 3}l-3.4-3.4a2 2 0 0 1 3.4-2.6a2 2 0 0 1 3.4 2.6z"/>`).join("")}</g>
       <path class="fechado" d="M${a - 4} ${b}q4 3.5 8 0M${c - 4} ${d}q4 3.5 8 0" fill="none" stroke="#101216" stroke-width="2.2" stroke-linecap="round"/>
       <g class="susto" fill="#101216"><circle cx="${a}" cy="${b}" r="4.6" fill="#fff"/><circle cx="${c}" cy="${d}" r="4.6" fill="#fff"/><circle cx="${a}" cy="${b}" r="1.5"/><circle cx="${c}" cy="${d}" r="1.5"/><ellipse cx="20" cy="${b + 8}" rx="2.2" ry="2.8"/><path d="M38 0q3 4 0 6.5q-3-2.5 0-6.5Z" fill="#9FD3FF"/></g>
       <g class="zzz" fill="#9AA0AA" font-family="Sora,sans-serif" font-weight="700"><text x="33" y="-2" font-size="8">z</text><text x="38" y="-7" font-size="6">z</text></g>
     </g></svg>`; };
+  // pequenos desenhos usados nas ações
+  const NOTA = '<svg width="9" height="12" viewBox="0 0 9 12"><path d="M3 9.5V1.5l5-1.2v8" fill="none" stroke="#C6F36B" stroke-width="1.6"/><circle cx="2" cy="9.6" r="2" fill="#C6F36B"/><circle cx="7" cy="8.4" r="2" fill="#C6F36B"/></svg>';
+  const PUFF = '<svg width="6" height="6"><circle cx="3" cy="3" r="3" fill="#9AA0AA"/></svg>';
+  const PINGO = '<svg width="3" height="5"><rect width="3" height="5" rx="1.5" fill="#7FB8F0"/></svg>';
+  const PONTO = '<svg width="4" height="4"><circle cx="2" cy="2" r="2" fill="#F1F2F4"/></svg>';
+  const REGADOR = '<svg width="20" height="14" viewBox="0 0 20 14"><rect x="5" y="4" width="10" height="9" rx="2.5" fill="#8FA3B8"/><path d="M6 7L1 3" stroke="#8FA3B8" stroke-width="2.2" stroke-linecap="round"/><path d="M15 6q4 0 3 5" fill="none" stroke="#8FA3B8" stroke-width="1.8"/></svg>';
+  const BORBOLETA = '<svg width="14" height="12" viewBox="0 0 14 12"><ellipse cx="4" cy="4" rx="4" ry="3.6" fill="#F2A65A"/><ellipse cx="10" cy="4" rx="4" ry="3.6" fill="#F2A65A"/><ellipse cx="4.5" cy="9" rx="3" ry="2.6" fill="#FFD27A"/><ellipse cx="9.5" cy="9" rx="3" ry="2.6" fill="#FFD27A"/><rect x="6.3" y="2" width="1.4" height="9" rx=".7" fill="#3A2A1A"/></svg>';
+
   const reduz = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const noite = () => new Date().getHours() < 5;
   const rnd = (a, b) => a + Math.random() * (b - a);
+  const suave = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
+  const preso = (v, a, b) => Math.min(b, Math.max(a, v));
+  const altura = (m) => (40 - F[m.el.dataset.forma].topo) * 31.5 / 54; // do pé ao topo da cabeça, em px
   let px = -1e4, py = -1e4;
   addEventListener("pointermove", (e) => { px = e.clientX; py = e.clientY; }, { passive: true });
 
-  // susto: treme, pula e foge para longe de x (na tela); quem espia se esconde
-  const assusta = (m, x) => {
-    if (m.estado === "susto" || m.estado === "corre" || m.estado === "briga") return;
-    const el = m.el;
-    if (reduz) { el.classList.add("assustado"); setTimeout(() => el.classList.remove("assustado"), 700); return; }
-    el.classList.remove("dorme", "pisca", "fecha", "amor"); el.classList.add("assustado");
-    m.estado = "susto"; m.tS = 0; m.pulou = false; m.sq = 0.6; m.fugaX = x;
+  // efeito solto (nota, fumacinha, pingo...) na faixa do Broto, relativo ao centro dele no chão
+  const fx = (m, html, x, y, quadros, dur, cls = "") => {
+    const s = document.createElement("span");
+    s.className = "fx " + cls; s.innerHTML = html;
+    s.style.left = (m.x + 22 + x) + "px"; s.style.bottom = -y + "px";
+    m.trilha.appendChild(s);
+    if (quadros) s.animate(quadros, { duration: dur, easing: "ease-out", fill: "forwards" }).onfinish = () => s.remove();
+    return s;
   };
 
   const bichos = [...document.querySelectorAll(".bicho")].map((el, i) => {
@@ -208,24 +230,105 @@
     };
     const [a, b] = faixa();
     const m = { el, espia, faixa, trilha, svg: el.querySelector("svg"), tronco: el.querySelector(".tronco"), pes: el.querySelectorAll(".pe"), olhos: el.querySelector(".olhos"),
+      folha: el.querySelector(".folha"), topete: el.querySelector(".topete"), orelhas: el.querySelectorAll(".orelha"), mao: el.querySelector(".mao"),
       x: espia ? 6 : a + (b - a) * [0.7, 0.15, 0.5, 0.85][i % 4], alvo: 0, v: 0, vmax: 26, f: 1, face: 1, fase: rnd(0, 6), y: 0, vy: 0, sq: 0, chao: 0,
-      estado: "parado", espera: rnd(0.5, 3), tS: 0, pulou: false, cansado: 0, fugaX: 0, acao: "", tA: 0, durA: 0, briga: null };
+      estado: "parado", espera: rnd(0.5, 3), tS: 0, pulou: false, cansado: 0, fugaX: 0, acao: "", tA: 0, durA: 0, briga: null, evento: null, inclina: 0 };
     m.alvo = m.x;
     el.addEventListener("click", (e) => assusta(m, e.clientX));
     (function piscar() { setTimeout(() => { if (!el.classList.contains("dorme") && !el.classList.contains("assustado")) { el.classList.add("pisca"); setTimeout(() => el.classList.remove("pisca"), 150); } piscar(); }, rnd(2200, 6000)); })();
     return m;
   });
-
-  // Ações aleatórias de quem está parado
-  const DUR = { pulinhos: 1.2, espreguica: 1.7, olha: 2.2, danca: 2.2, cochilo: 3.5 };
-  const iniciaAcao = (m, n) => {
-    m.estado = "acao"; m.acao = n; m.tA = 0; m.ult = -1; m.face0 = m.face || 1; m.durA = DUR[n];
-    m.el.classList.toggle("fecha", n === "espreguica");
-  };
-  const fimAcao = (m) => { m.el.classList.remove("fecha"); m.estado = "parado"; m.acao = ""; m.espera = rnd(1.5, 4); };
-
+  const B = Object.fromEntries(bichos.map((m) => [m.el.dataset.forma, m]));
   const chaoEl = document.querySelector(".trilha.chao");
   const doChao = bichos.filter((m) => m.trilha === chaoEl);
+
+  // ---------- ações de um Broto só ----------
+  const DUR = { pulinhos: 1.2, espreguica: 1.7, olha: 2.2, danca: 2.2, cochilo: 3.5, tropeco: 2.1, espirro: 1.5, rega: 2.9, helice: 2.0, aceno: 2.0, acena: 2.4 };
+  const limpa = (m) => {
+    m.el.classList.remove("fecha", "vergonha", "acena");
+    [m.folha, m.topete, m.mao, ...m.orelhas].forEach((n) => n && n.removeAttribute("transform"));
+    if (m.acao === "helice") m.chao = 0;
+    if (m.caca) { m.caca.el.remove(); m.caca = null; }
+    m.acao = ""; m.inclina = 0;
+  };
+  const iniciaAcao = (m, n) => {
+    limpa(m);
+    m.estado = "acao"; m.acao = n; m.tA = 0; m.ult = -1; m.face0 = m.face || 1; m.durA = DUR[n]; m.feito = false;
+    m.el.classList.toggle("fecha", n === "espreguica");
+    if (n === "aceno") { m.el.classList.add("acena"); if (m.y === m.chao) { m.vy = -140; m.sq = -0.4; } }
+    if (n === "rega") fx(m, REGADOR, 8, -34, [
+      { opacity: 0, transform: "rotate(0deg)" }, { opacity: 1, transform: "rotate(0deg)", offset: 0.12 },
+      { opacity: 1, transform: "rotate(-32deg)", offset: 0.3 }, { opacity: 1, transform: "rotate(-32deg)", offset: 0.8 },
+      { opacity: 0, transform: "rotate(0deg)" }], 2800, "regador");
+  };
+  const fimAcao = (m) => { limpa(m); m.estado = "parado"; m.espera = rnd(1.5, 4); };
+  const sorteiaAcao = (m) => {
+    const l = ["pulinhos", "espreguica", "olha", "danca", "cochilo", "espirro", "borboleta"];
+    if (m === B.broto) l.push("rega", "rega");
+    if (m === B.orelhudo) l.push("helice", "helice");
+    return l[Math.floor(Math.random() * l.length)];
+  };
+  const iniciaCaca = (m) => {
+    const [a, b] = m.faixa();
+    m.estado = "caca";
+    m.caca = { el: fx(m, BORBOLETA, -m.x - 22, 0, null, 0, "borboleta"), t: 0, x0: preso(m.x + 22 + m.face * 40, a + 30, b + 14), fase: rnd(0, 6), amp: Math.min(60, (b - a) / 2) };
+  };
+
+  const acao = (m, dt) => {
+    const el = m.el, cl = el.classList, n = m.acao, T = (m.tA += dt);
+    if (n === "pulinhos" && m.vy === 0 && m.y === m.chao && T < m.durA - 0.3 && T - m.ult > 0.34) { m.vy = -120; m.sq = -0.45; m.ult = T; }
+    if (n === "olha") m.face = Math.floor(T / 0.55) % 2 ? -m.face0 : m.face0;
+    if (n === "tropeco") {
+      cl.toggle("fecha", T > 0.25 && T < 0.9);
+      if (T > 1.1) { cl.add("vergonha"); m.face = Math.floor((T - 1.15) / 0.45) % 2 ? -m.face0 : m.face0; }
+    }
+    if (n === "espirro") {
+      cl.toggle("fecha", T > 0.35 && T < 0.95);
+      if (!m.feito && T >= 0.7) {
+        m.feito = true; m.sq = 0.9; m.v = -m.face * 80;
+        for (let k = 0; k < 3; k++) fx(m, PUFF, m.face * 12, -16 - k * 3, [{ transform: "translate(0,0) scale(1)", opacity: 0.9 }, { transform: `translate(${m.face * rnd(14, 24)}px, ${rnd(-8, 4)}px) scale(.4)`, opacity: 0 }], 450);
+      }
+    }
+    if (n === "rega") {
+      cl.toggle("fecha", T > 1.0 && T < 2.4);
+      if (T > 0.9 && T < 1.9 && T - m.ult > 0.12) { m.ult = T; fx(m, PINGO, 7 + rnd(-1, 1), -44, [{ transform: "translate(0,0)", opacity: 1 }, { transform: "translate(-5px, 15px)", opacity: 0.2 }], 350); }
+      const k = T < 1 ? 1 : T < 1.8 ? 1 + 0.6 * suave((T - 1) / 0.8) : T < 2.4 ? 1.6 : 1 + 0.6 * (1 - suave((T - 2.4) / 0.4));
+      m.folha.setAttribute("transform", `translate(20 4) scale(${k.toFixed(3)}) translate(-20 -4)`);
+    }
+    if (n === "helice") {
+      const ang = Math.sin(T * 30) * 40;
+      m.orelhas[0].setAttribute("transform", `rotate(${ang.toFixed(1)} 11 12)`);
+      m.orelhas[1].setAttribute("transform", `rotate(${(-ang).toFixed(1)} 29 12)`);
+      const p = T / m.durA;
+      m.chao = p > 0.15 && p < 0.85 ? -14 * Math.sin(Math.PI * (p - 0.15) / 0.7) : 0; m.y = m.chao; m.vy = 0;
+    }
+    if (n === "aceno") m.mao.setAttribute("transform", `rotate(${(-25 + Math.sin(T * 14) * 30).toFixed(1)} 33 24)`);
+    if (n === "acena") {
+      m.x += (-14 - m.x) * Math.min(1, dt * 5);
+      m.topete.setAttribute("transform", `rotate(${(Math.sin(T * 13) * 30).toFixed(1)} 20 4)`);
+    }
+    if (T > m.durA) fimAcao(m);
+  };
+
+  // ---------- susto (toque e raio) ----------
+  let evento = null, proxEvento = rnd(20, 35);
+  const encerra = (ev, exceto) => {
+    ev.parts.forEach((p) => {
+      p.evento = null; p.olharM = null; p.inclina = 0; p.el.style.zIndex = ""; p.chao = 0;
+      if (p !== exceto && !["susto", "corre"].includes(p.estado)) { p.estado = "parado"; p.espera = rnd(1, 2.5); p.cansado = Math.max(p.cansado, 0.8); }
+    });
+    if (evento === ev) { evento = null; proxEvento = rnd(25, 50); }
+  };
+  const assusta = (m, x) => {
+    if (m.evento) encerra(m.evento, m);
+    if (m.estado === "susto" || m.estado === "corre" || m.estado === "briga") return;
+    if (m.estado === "acao" || m.estado === "caca") limpa(m);
+    const el = m.el;
+    if (reduz) { el.classList.add("assustado"); setTimeout(() => el.classList.remove("assustado"), 700); return; }
+    el.classList.remove("dorme", "pisca", "fecha", "amor"); el.classList.add("assustado");
+    m.estado = "susto"; m.tS = 0; m.pulou = false; m.sq = 0.6; m.fugaX = x;
+  };
+
   const chuva = { fase: "nada", t: 0, prox: rnd(15, 30), dur: 0, nuvens: [], gotas: [], respingos: [] };
   const pausas = new Map();
 
@@ -248,28 +351,47 @@
     return melhor;
   };
 
+  const ANDAM = ["anda", "corre", "feliz", "caca", "pega", "piramide", "cochicho"];
   const passo = (m, dt, t) => {
-    const [a, b] = m.faixa(), el = m.el;
-    el.classList.toggle("dorme", ((noite() && m.estado === "parado") || (m.estado === "acao" && m.acao === "cochilo")) && !el.classList.contains("assustado"));
+    const [a, b] = m.faixa(), el = m.el, cl = el.classList;
+    cl.toggle("dorme", ((noite() && m.estado === "parado") || (m.estado === "acao" && m.acao === "cochilo")) && !cl.contains("assustado"));
     if (m.estado === "parado") {
       if (chuva.fase === "chove" && m.trilha === chaoEl && m.cansado <= 0) { m.estado = "feliz"; m.alvo = m.x; }
       else if (m.cansado > 0) m.cansado -= dt;
-      else if (!el.classList.contains("dorme")) {
+      else if (!cl.contains("dorme")) {
         // apertado ao lado de outro? sai mais cedo (com tolerância: espera um pouco antes)
         const perto = !m.espia && vizinhos(m).some((o) => Math.abs(o.x - m.x) < 34);
         if (perto && !m.apertado) { m.apertado = true; m.espera = Math.min(m.espera, rnd(0.8, 2)); }
         if ((m.espera -= dt) <= 0) {
           m.apertado = false;
-          if (m.espia) { m.alvo = m.x > -10 ? (Math.random() < 0.5 ? -30 : -10) : 6; m.vmax = 30; m.estado = "anda"; }
-          else if (!perto && Math.random() < 0.4) iniciaAcao(m, ["pulinhos", "espreguica", "olha", "danca", "cochilo"][Math.floor(Math.random() * 5)]);
-          else { m.alvo = escolheAlvo(m, a, b); m.vmax = rnd(20, 32); m.estado = "anda"; }
+          if (m.espia) {
+            if (m.x > -10 && Math.random() < 0.3) iniciaAcao(m, "acena");
+            else { m.alvo = m.x > -10 ? (Math.random() < 0.5 ? -30 : -10) : 6; m.vmax = 30; m.estado = "anda"; }
+          } else if (!perto && Math.random() < 0.45) {
+            const n = sorteiaAcao(m);
+            if (n === "borboleta") iniciaCaca(m); else iniciaAcao(m, n);
+          } else {
+            m.alvo = escolheAlvo(m, a, b); m.assobia = Math.random() < 0.2;
+            m.vmax = m.assobia ? rnd(13, 17) : rnd(20, 32); m.estado = "anda";
+          }
         }
       }
-    } else if (m.estado === "acao") {
-      m.tA += dt;
-      if (m.acao === "pulinhos" && m.vy === 0 && m.y === m.chao && m.tA < m.durA - 0.3 && m.tA - m.ult > 0.34) { m.vy = -120; m.sq = -0.45; m.ult = m.tA; }
-      if (m.acao === "olha") m.face = Math.floor(m.tA / 0.55) % 2 ? -m.face0 : m.face0;
-      if (m.tA > m.durA) fimAcao(m);
+    } else if (m.estado === "anda") {
+      if (!m.espia && m.y === 0 && Math.abs(m.v) > 12 && Math.random() < dt * 0.035) iniciaAcao(m, "tropeco");
+      else if (m.assobia && (m.nota = (m.nota || 0) - dt) <= 0) {
+        m.nota = 0.5;
+        fx(m, NOTA, m.face * 5, -36, [{ transform: "translate(0,0)", opacity: 1 }, { transform: `translate(${rnd(-7, 7)}px, -20px)`, opacity: 0 }], 1100);
+      }
+    } else if (m.estado === "acao") acao(m, dt);
+    else if (m.estado === "caca") {
+      // corre atrás da borboleta, pulando quando ela passa perto
+      const c = m.caca; c.t += dt;
+      const bx = c.x0 + Math.sin(c.t * 1.4 + c.fase) * c.amp, by = -40 + Math.sin(c.t * 3.3) * 8 - (c.t > 4 ? (c.t - 4) * 70 : 0);
+      c.el.style.transform = `translate(${(bx - 7).toFixed(1)}px, ${by.toFixed(1)}px)`;
+      c.el.style.opacity = c.t > 4 ? Math.max(0, 1 - (c.t - 4)) : 1;
+      m.alvo = preso(bx - 22, a, b); m.vmax = 60;
+      if (Math.abs(m.x + 22 - bx) < 14 && m.y === 0 && c.t < 4 && Math.random() < dt * 3) { m.vy = -210; m.sq = -0.5; }
+      if (c.t > 5) { limpa(m); m.estado = "parado"; m.espera = rnd(1.5, 3); }
     } else if (m.estado === "susto") {
       m.tS += dt;
       if (!m.pulou && m.tS > 0.12) { m.pulou = true; m.vy = -190; m.sq = -0.7; }
@@ -281,7 +403,7 @@
       // começou a chover: corações nos olhos e pulos altos por um momento
       m.tA += dt;
       if (m.vy === 0 && m.y === m.chao && m.tA < 1.3 && m.tA - m.ult > 0.3) { m.vy = -220; m.sq = -0.6; m.ult = m.tA; }
-      if (m.tA > 1.6) { el.classList.remove("amor"); m.estado = "feliz"; m.alvo = m.x; }
+      if (m.tA > 1.6) { cl.remove("amor"); m.estado = "feliz"; m.alvo = m.x; }
     } else if (m.estado === "feliz") {
       // corre de um lado para o outro na chuva, dando pulinhos
       if (chuva.fase !== "chove") { m.estado = "parado"; m.espera = rnd(1, 3); }
@@ -293,50 +415,53 @@
       const g = m.briga, o = g.outro; g.t += dt;
       if (g.t > 4) { m.estado = "parado"; m.chao = 0; m.briga = null; el.style.zIndex = ""; }
       else if (g.papel === "sobe") {
-        if (!g.pulou && g.t > 0.4) { g.pulou = true; m.chao = -((40 - F[o.el.dataset.forma].topo) * 31.5 / 54) + 1; m.vy = -270; m.sq = -0.6; m.v = (o.x - m.x) / 0.45; }
+        if (!g.pulou && g.t > 0.4) { g.pulou = true; m.chao = -altura(o) + 1; m.vy = -270; m.sq = -0.6; m.v = (o.x - m.x) / 0.45; }
         if (g.pulou && !g.pousou && m.vy === 0 && m.y === m.chao) { g.pousou = g.t; m.v = 0; o.sq = 0.45; }
         if (g.pousou) {
           m.x += (o.x - m.x) * Math.min(1, dt * 12);
           if (g.t - g.pousou > 0.7 && !g.empurrou) {
             g.empurrou = true; m.chao = 0; m.vy = -200; m.v = g.lado * 110;
             o.briga = null; o.estado = "corre"; o.el.classList.add("assustado");
-            o.alvo = Math.min(b, Math.max(a, o.x - g.lado * 70)); o.vmax = 150;
+            o.alvo = preso(o.x - g.lado * 70, a, b); o.vmax = 150;
           }
         }
         if (g.empurrou && m.vy === 0 && m.y === 0) {
-          m.briga = null; el.style.zIndex = ""; m.estado = "corre"; m.alvo = Math.min(b, Math.max(a, m.x + g.lado * 20)); m.vmax = 80;
+          m.briga = null; el.style.zIndex = ""; m.estado = "corre"; m.alvo = preso(m.x + g.lado * 20, a, b); m.vmax = 80;
         }
       }
     }
-    if (m.estado === "anda" || m.estado === "corre" || m.estado === "feliz") {
+    if (ANDAM.includes(m.estado)) {
       const dx = m.alvo - m.x, quer = Math.sign(dx) * Math.min(m.vmax, Math.abs(dx) * 3.5);
       m.v += (quer - m.v) * Math.min(1, dt * (m.estado === "anda" ? 4 : 9));
       if (Math.abs(dx) < 0.6 && Math.abs(m.v) < 3) {
         m.x = m.alvo; m.v = 0;
         if (m.estado === "corre") {
           m.cansado = m.espia ? 2.5 : 1.4;
-          setTimeout(() => el.classList.remove("assustado"), m.espia ? 2400 : 900);
+          setTimeout(() => cl.remove("assustado"), m.espia ? 2400 : 900);
           if (m.espia) m.espera = 0;
         }
-        if (m.estado !== "feliz") { m.estado = "parado"; m.espera = m.espia ? rnd(2, 4) : rnd(1.5, 4.5); }
+        if (m.estado === "anda" || m.estado === "corre") { m.estado = "parado"; m.espera = m.espia ? rnd(2, 4) : rnd(1.5, 4.5); m.assobia = false; }
       }
-    } else if (m.estado !== "briga" || !m.briga || !m.briga.pulou) m.v *= Math.exp(-dt * 8);
+    } else if (m.y >= m.chao - 0.5) m.v *= Math.exp(-dt * 8); // no chão, escorrega até parar; no ar mantém o embalo
     m.x += m.v * dt;
-    // pulo com gravidade; "chao" sobe quando um bicho está em cima do outro
+    // pulo com gravidade; "chao" sobe quando um Broto está em cima do outro
     if (m.vy || m.y < m.chao - 0.01) { m.vy += 1100 * dt; m.y += m.vy * dt; if (m.y >= m.chao && m.vy >= 0) { m.y = m.chao; m.vy = 0; m.sq = 0.55; } }
     m.sq *= Math.exp(-dt * 9);
     const vel = Math.abs(m.v), anda = m.y < m.chao - 0.5 ? 0 : Math.min(1, vel / 28);
-    if (!m.espia && vel > 4 && m.estado !== "briga") m.face = Math.sign(m.v);
+    if (!m.espia && vel > 4 && m.estado !== "briga" && m.estado !== "torre" && m.acao !== "tropeco" && m.acao !== "espirro") m.face = Math.sign(m.v);
     m.f += (m.face - m.f) * Math.min(1, dt * 10);
     m.fase += dt * (5 + vel * 0.22);
     const s = Math.sin(m.fase);
     let resp = (1 - anda) * (m.cansado > 0 ? Math.sin(t * 11) * 0.05 : Math.sin(t * 2.4) * 0.022);
-    let bob = -Math.abs(s) * 2.4 * anda, incl = s * 4 * anda + Math.min(12, vel * 0.07);
+    let bob = -Math.abs(s) * 2.4 * anda, incl = s * 4 * anda + Math.min(12, vel * 0.07) + m.inclina;
     let treme = m.estado === "susto" && !m.pulou ? Math.sin(t * 90) * 1.3 : 0;
     if (m.estado === "acao") {
-      const e = Math.sin(Math.PI * Math.min(1, m.tA / m.durA));
+      const T = m.tA, e = Math.sin(Math.PI * Math.min(1, T / m.durA));
       if (m.acao === "espreguica") resp += e * 0.2;
-      if (m.acao === "danca") { incl += Math.sin(m.tA * 9) * 11 * e; bob -= Math.abs(Math.sin(m.tA * 9)) * 2.5 * e; }
+      if (m.acao === "danca") { incl += Math.sin(T * 9) * 11 * e; bob -= Math.abs(Math.sin(T * 9)) * 2.5 * e; }
+      if (m.acao === "tropeco") { const q = T < 0.25 ? suave(T / 0.25) : T < 0.9 ? 1 : 1 - suave((T - 0.9) / 0.25); incl += 82 * q; bob += 3 * q; }
+      if (m.acao === "espirro" && T < 0.7) { resp += 0.13 * suave(T / 0.7); incl -= 7 * suave(T / 0.7); }
+      if (m.acao === "aceno") incl += Math.sin(T * 14) * 3;
     }
     if (m.estado === "briga" && m.briga) {
       const g = m.briga;
@@ -349,21 +474,129 @@
     m.tronco.style.transform = `translateY(${bob.toFixed(2)}px) rotate(${incl.toFixed(2)}deg) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`;
     m.pes[0].style.transform = `translateY(${(-Math.max(0, s) * 2.6 * anda).toFixed(2)}px)`;
     m.pes[1].style.transform = `translateY(${(-Math.max(0, -s) * 2.6 * anda).toFixed(2)}px)`;
-    // olhar: segue o dedo; na briga, olha o outro
-    const r = el.getBoundingClientRect(); let tx = px, ty = py;
+    // olhar: segue o dedo; na briga/brincadeira olha o outro; na caça, a borboleta; no aceno, quem está vendo
+    const r = el.getBoundingClientRect(); let tx = px, ty = py, frente = false;
     if (m.estado === "briga" && m.briga) { const q = m.briga.outro.el.getBoundingClientRect(); tx = q.left + 22; ty = q.top + 30; }
+    else if (m.olharM) { const q = m.olharM.el.getBoundingClientRect(); tx = q.left + 22; ty = q.top + 30; }
+    else if (m.estado === "caca" && m.caca) { const q = m.caca.el.getBoundingClientRect(); tx = q.left + 7; ty = q.top + 6; }
+    else if (m.acao === "aceno" || m.acao === "acena") frente = true;
     const ox = tx - (r.left + r.width / 2), oy = ty - (r.top + r.height / 2), d = Math.hypot(ox, oy) || 1;
     const k = tx < -1e3 ? 0 : 1;
-    m.olhos.style.transform = `translate(${((ox / d) * 1.7 * k * Math.sign(m.f || 1)).toFixed(2)}px, ${((oy / d) * 1.3 * k).toFixed(2)}px)`;
+    m.olhos.style.transform = frente ? "translate(0px, 0.9px)" : `translate(${((ox / d) * 1.7 * k * Math.sign(m.f || 1)).toFixed(2)}px, ${((oy / d) * 1.3 * k).toFixed(2)}px)`;
   };
 
-  // Chuva: de vez em quando chegam nuvens de quadradinhos e chove no chão do rodapé
+  // ---------- brincadeiras em grupo no rodapé: pega-pega, pirâmide e cochicho ----------
+  const livre = (m) => (m.estado === "parado" || m.estado === "anda") && m.cansado <= 0 && !m.el.classList.contains("dorme") && !m.evento;
+  const comeca = (tipo, livres) => {
+    const [a, b] = livres[0].faixa();
+    if (tipo === "pega") {
+      const ev = { tipo, parts: livres, peg: livres[Math.floor(Math.random() * livres.length)], t: 0, fim: rnd(7, 10), espera: 0.7 };
+      livres.forEach((p) => { p.estado = "pega"; p.evento = ev; p.alvo = p.x; });
+      return ev;
+    }
+    if (tipo === "cochicho") {
+      let par = [livres[0], livres[1]];
+      for (let i = 0; i < livres.length; i++) for (let j = i + 1; j < livres.length; j++)
+        if (Math.abs(livres[i].x - livres[j].x) < Math.abs(par[0].x - par[1].x)) par = [livres[i], livres[j]];
+      const [A, Bo] = Math.random() < 0.5 ? par : [par[1], par[0]];
+      let lado = Math.sign(A.x - Bo.x) || 1;
+      if (Bo.x + lado * 26 < a || Bo.x + lado * 26 > b) lado = -lado;
+      const ev = { tipo, parts: [A, Bo], A, B: Bo, fase: "vai", t: 0 };
+      A.estado = Bo.estado = "cochicho"; A.evento = Bo.evento = ev;
+      A.alvo = preso(Bo.x + lado * 26, a, b); A.vmax = 30; Bo.alvo = Bo.x;
+      A.olharM = Bo; Bo.olharM = A;
+      return ev;
+    }
+    // pirâmide: B5 (orelhudo) embaixo, B3 (pílula) no meio, B4 (gota) em cima
+    const base = B.orelhudo, meio = B.pilula, topo = B.gota;
+    const xc = preso((base.x + meio.x + topo.x) / 3, a + 40, b - 40);
+    const ev = { tipo, parts: [base, meio, topo], base, meio, topo, fase: "junta", t: 0 };
+    base.alvo = xc; meio.alvo = preso(xc + 36, a, b); topo.alvo = preso(xc - 36, a, b);
+    ev.parts.forEach((p) => { p.estado = "piramide"; p.evento = ev; p.vmax = 34; });
+    return ev;
+  };
+  const atualiza = (ev, dt) => {
+    ev.t += dt;
+    const [a, b] = ev.parts[0].faixa();
+    if (ev.tipo === "pega") {
+      if (ev.t > ev.fim) return encerra(ev);
+      ev.espera -= dt;
+      const peg = ev.peg, outros = ev.parts.filter((p) => p !== peg);
+      const presa = outros.reduce((x, p) => (Math.abs(p.x - peg.x) < Math.abs(x.x - peg.x) ? p : x));
+      peg.olharM = presa; peg.vmax = 88; peg.alvo = ev.espera > 0 ? peg.x : preso(presa.x, a, b);
+      outros.forEach((p) => {
+        p.olharM = peg; p.vmax = 74; p.alvo = peg.x < p.x ? b : a;
+        // encurralado: pula por cima de quem está pegando
+        if (Math.abs(p.x - p.alvo) < 6 && Math.abs(peg.x - p.x) < 46 && p.y === 0 && (!p.esquiva || ev.t - p.esquiva > 1.5)) {
+          p.esquiva = ev.t; p.vy = -290; p.v = (peg.x < p.x ? -1 : 1) * 120; p.el.style.zIndex = 3;
+          setTimeout(() => (p.el.style.zIndex = ""), 600);
+        }
+      });
+      if (ev.espera <= 0) for (const o of outros) if (Math.abs(peg.x - o.x) < 16 && o.y > -4 && peg.y > -4) {
+        o.sq = 0.6; o.vy = -150; ev.peg = o; ev.espera = 0.8; break; // quem foi tocado vira o pegador
+      }
+    } else if (ev.tipo === "cochicho") {
+      const { A, B: Bo } = ev;
+      if (ev.fase === "vai") {
+        if (Math.abs(A.x - A.alvo) < 1 && Math.abs(A.v) < 3) { ev.fase = "fala"; ev.t = 0; A.face = Math.sign(Bo.x - A.x) || 1; Bo.face = -A.face; }
+        else if (ev.t > 6) encerra(ev);
+      } else if (ev.fase === "fala") {
+        A.inclina = 14 * suave(ev.t / 0.3); Bo.inclina = 4 * suave(ev.t / 0.3);
+        if (!ev.ult || ev.t - ev.ult > 0.3) { ev.ult = ev.t; fx(A, PONTO, A.face * 10, -30, [{ transform: "translate(0,0)", opacity: 1 }, { transform: `translate(${A.face * 8}px, -4px)`, opacity: 0 }], 500); }
+        if (ev.t > 1.3) { ev.fase = "surpresa"; ev.t = 0; A.inclina = Bo.inclina = 0; Bo.el.classList.add("assustado"); Bo.vy = -190; Bo.sq = -0.6; A.vy = -100; }
+      } else if (ev.t > 0.9) { Bo.el.classList.remove("assustado"); encerra(ev); }
+    } else {
+      const { base, meio, topo } = ev;
+      if (ev.fase === "junta") {
+        if (ev.parts.every((p) => Math.abs(p.x - p.alvo) < 1.5 && Math.abs(p.v) < 4)) {
+          ev.fase = "sobe1"; ev.t = 0; ev.parts.forEach((p) => (p.estado = "torre"));
+          meio.face = Math.sign(base.x - meio.x) || 1; topo.face = Math.sign(base.x - topo.x) || -1;
+        } else if (ev.t > 8) encerra(ev);
+      } else if (ev.fase === "sobe1") {
+        if (!ev.p1 && ev.t > 0.3) { ev.p1 = true; meio.chao = -altura(base) + 1; meio.vy = -280; meio.sq = -0.6; meio.v = (base.x - meio.x) / 0.45; meio.el.style.zIndex = 3; }
+        if (ev.p1 && meio.vy === 0 && meio.y === meio.chao) { meio.v = 0; base.sq = 0.5; ev.fase = "sobe2"; ev.t = 0; }
+      } else if (ev.fase === "sobe2") {
+        meio.x += (base.x - meio.x) * Math.min(1, dt * 12);
+        if (!ev.p2 && ev.t > 0.3) { ev.p2 = true; topo.chao = meio.chao - altura(meio) + 1; topo.vy = -340; topo.sq = -0.6; topo.v = (base.x - topo.x) / 0.5; topo.el.style.zIndex = 4; }
+        if (ev.p2 && topo.vy === 0 && topo.y === topo.chao) { topo.v = 0; meio.sq = 0.5; base.sq = 0.4; ev.fase = "balanca"; ev.t = 0; }
+      } else if (ev.fase === "balanca") {
+        const amp = 2 + ev.t * 5;
+        meio.x = base.x + Math.sin(ev.t * 7) * amp * 0.4; topo.x = base.x + Math.sin(ev.t * 7 - 0.6) * amp;
+        meio.inclina = Math.sin(ev.t * 7) * amp * 0.8; topo.inclina = Math.sin(ev.t * 7 - 0.6) * amp * 1.4;
+        if (ev.t > 1.8) {
+          ev.fase = "cai"; ev.t = 0; meio.inclina = topo.inclina = 0;
+          topo.chao = 0; topo.vy = -160; topo.v = -110; meio.chao = 0; meio.vy = -120; meio.v = 90; base.sq = 0.3;
+          topo.el.classList.add("assustado"); meio.el.classList.add("assustado");
+        }
+      } else if (ev.t > 1.0) { topo.el.classList.remove("assustado"); meio.el.classList.remove("assustado"); encerra(ev); }
+    }
+  };
+  const eventos = (dt) => {
+    if (evento) return atualiza(evento, dt);
+    if (noite() || chuva.fase !== "nada" || (proxEvento -= dt) > 0) return;
+    proxEvento = rnd(25, 50);
+    const livres = doChao.filter(livre), opc = [];
+    if (livres.length >= 2) opc.push("pega", "cochicho");
+    if (livres.length === 3 && B.orelhudo && B.pilula && B.gota) opc.push("piramide");
+    if (opc.length) evento = comeca(opc[Math.floor(Math.random() * opc.length)], livres);
+  };
+
+  // ---------- quem volta para a aba é recebido com aceno ----------
+  let saiu = 0;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { saiu = performance.now(); return; }
+    if (!saiu || performance.now() - saiu < 1500) return;
+    bichos.forEach((m) => {
+      if ((m.estado === "parado" || m.estado === "anda") && !m.evento && !m.el.classList.contains("dorme")) iniciaAcao(m, m.espia ? "acena" : "aceno");
+    });
+  });
+
+  // ---------- chuva: nuvens de bolhas, gotas e raios ----------
   const ceu = document.createElement("canvas");
   ceu.className = "ceu"; ceu.setAttribute("aria-hidden", "true");
   chaoEl.parentElement.insertBefore(ceu, chaoEl);
   const g2 = ceu.getContext("2d"), ultimo = document.querySelector("main .slot:last-child .link");
   let H = 40, BASE = 30;
-  const suave = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
   const novaNuvem = (W, i, n) => {
     const w = rnd(70, 100);
     const alvo = (W / (n + 1)) * (i + 1) - w / 2 + rnd(-20, 20);
@@ -388,16 +621,17 @@
       c.t += dt;
       if (c.fase === "chega" && c.t > 1.6) {
         c.fase = "chove"; c.t = 0; c.proxRaio = rnd(3, 6);
+        if (evento) encerra(evento);
         doChao.forEach((m) => {
-          if (["parado", "anda", "acao", "feliz"].includes(m.estado)) {
-            m.el.classList.remove("fecha", "dorme"); m.el.classList.add("amor");
+          if (["parado", "anda", "acao", "feliz", "caca"].includes(m.estado)) {
+            limpa(m); m.el.classList.remove("fecha", "dorme"); m.el.classList.add("amor");
             m.estado = "alegria"; m.tA = 0; m.ult = -1; m.v *= 0.3;
           }
         });
       } else if (c.fase === "chove" && c.t > c.dur) { c.fase = "vai"; c.t = 0; }
       else if (c.fase === "vai" && c.t > 1.8 && !c.gotas.length) { c.fase = "nada"; c.nuvens = []; c.prox = rnd(30, 60); }
     }
-    // relâmpago: de vez em quando sai um raio de uma nuvem e assusta todos os mascotes do site
+    // relâmpago: de vez em quando sai um raio de uma nuvem e assusta todos os Brotos do site
     if (c.raio) { c.raio.t += dt; if (c.raio.t > 0.35) c.raio = null; }
     if (c.fase === "chove" && (c.proxRaio -= dt) <= 0) {
       c.proxRaio = rnd(4, 9);
@@ -456,7 +690,7 @@
     }
   };
 
-  // Briga: dois bichos do rodapé se encontram, um sobe no outro e empurra
+  // Briga: dois Brotos do rodapé se encontram, um sobe no outro e empurra
   const brigas = (t) => {
     if (chuva.fase !== "nada") return; // na chuva ninguém briga
     for (let i = 0; i < doChao.length; i++) for (let j = i + 1; j < doChao.length; j++) {
@@ -478,7 +712,7 @@
   let ant = performance.now();
   const loop = (agora) => {
     const dt = Math.min(0.05, (agora - ant) / 1000), t = agora / 1000; ant = agora;
-    brigas(t); chover(dt, t);
+    brigas(t); eventos(dt); chover(dt, t);
     bichos.forEach((m) => passo(m, dt, t));
     requestAnimationFrame(loop);
   };
