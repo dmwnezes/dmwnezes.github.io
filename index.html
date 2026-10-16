@@ -105,9 +105,13 @@
   .bicho.pisca .fechado, .bicho.dorme .fechado, .bicho.dorme .zzz, .bicho.assustado .susto { display: inline; }
   .bicho.fecha .olhos { display: none; }
   .bicho.fecha .fechado { display: inline; }
-  .gotinha { position: absolute; left: 0; bottom: 0; width: 10px; height: 14px; pointer-events: none; transition: opacity .3s, transform .3s; }
-  .gotinha svg { display: block; width: 10px; height: 14px; }
-  .gotinha.splash { opacity: 0; }
+  /* Chuva: nuvens e gotas num canvas atrás dos botões, acima do chão dos mascotes */
+  .ceu { position: absolute; left: 0; bottom: 42px; width: 100%; height: 40px; pointer-events: none; z-index: 0; }
+  .bicho .coracao { display: none; }
+  .bicho.amor .olhos, .bicho.amor .fechado { display: none; }
+  .bicho.amor .coracao { display: inline; }
+  .bicho.amor .coracao path { transform-box: fill-box; transform-origin: center; animation: bate .45s ease-in-out infinite; }
+  @keyframes bate { 50% { transform: scale(1.3); } }
   .bicho.espia { left: auto; right: -22px; top: 50%; bottom: auto; margin-top: -22px; z-index: 0; }
   .bicho.espia svg { transform: rotate(14deg); }
 </style>
@@ -172,6 +176,7 @@
     <rect class="pe" x="9" y="34" width="7" height="6" rx="3" fill="${f.pe}"/><rect class="pe" x="24" y="34" width="7" height="6" rx="3" fill="${f.pe}"/>
     <g class="tronco">${f.c}
       <g class="olhos" fill="#101216"><circle cx="${a}" cy="${b}" r="2.6"/><circle cx="${c}" cy="${d}" r="2.6"/></g>
+      <g class="coracao" fill="#FF5C7A">${[[a, b], [c, d]].map(([x, y]) => `<path d="M${x} ${y + 3}l-3.4-3.4a2 2 0 0 1 3.4-2.6a2 2 0 0 1 3.4 2.6z"/>`).join("")}</g>
       <path class="fechado" d="M${a - 4} ${b}q4 3.5 8 0M${c - 4} ${d}q4 3.5 8 0" fill="none" stroke="#101216" stroke-width="2.2" stroke-linecap="round"/>
       <g class="susto" fill="#101216"><circle cx="${a}" cy="${b}" r="4.6" fill="#fff"/><circle cx="${c}" cy="${d}" r="4.6" fill="#fff"/><circle cx="${a}" cy="${b}" r="1.5"/><circle cx="${c}" cy="${d}" r="1.5"/><ellipse cx="20" cy="${b + 8}" rx="2.2" ry="2.8"/><path d="M38 0q3 4 0 6.5q-3-2.5 0-6.5Z" fill="#9FD3FF"/></g>
       <g class="zzz" fill="#9AA0AA" font-family="Sora,sans-serif" font-weight="700"><text x="33" y="-2" font-size="8">z</text><text x="38" y="-7" font-size="6">z</text></g>
@@ -206,17 +211,16 @@
   });
 
   // Ações aleatórias de quem está parado
-  const DUR = { pulinhos: 1.2, espreguica: 1.7, olha: 2.2, danca: 2.2, cochilo: 3.5, triste: 1.3, comemora: 1.1 };
+  const DUR = { pulinhos: 1.2, espreguica: 1.7, olha: 2.2, danca: 2.2, cochilo: 3.5 };
   const iniciaAcao = (m, n) => {
     m.estado = "acao"; m.acao = n; m.tA = 0; m.ult = -1; m.face0 = m.face || 1; m.durA = DUR[n];
-    m.el.classList.toggle("fecha", n === "espreguica" || n === "triste");
+    m.el.classList.toggle("fecha", n === "espreguica");
   };
   const fimAcao = (m) => { m.el.classList.remove("fecha"); m.estado = "parado"; m.acao = ""; m.espera = rnd(1.5, 4); };
-  const livre = (m) => m.estado === "parado" || m.estado === "anda" || (m.estado === "acao" && m.acao !== "cochilo");
 
   const chaoEl = document.querySelector(".trilha.chao");
   const doChao = bichos.filter((m) => m.trilha === chaoEl);
-  let gota = null, proxGota = rnd(10, 18);
+  const chuva = { fase: "nada", t: 0, prox: rnd(15, 30), dur: 0, nuvens: [], gotas: [], respingos: [] };
   const pausas = new Map();
 
   // Prefere destinos longe dos vizinhos da mesma faixa; às vezes (15%) aceita ficar perto
@@ -242,7 +246,8 @@
     const [a, b] = m.faixa(), el = m.el;
     el.classList.toggle("dorme", ((noite() && m.estado === "parado") || (m.estado === "acao" && m.acao === "cochilo")) && !el.classList.contains("assustado"));
     if (m.estado === "parado") {
-      if (m.cansado > 0) m.cansado -= dt;
+      if (chuva.fase === "chove" && m.trilha === chaoEl && m.cansado <= 0) { m.estado = "feliz"; m.alvo = m.x; }
+      else if (m.cansado > 0) m.cansado -= dt;
       else if (!el.classList.contains("dorme")) {
         // apertado ao lado de outro? sai mais cedo (com tolerância: espera um pouco antes)
         const perto = !m.espia && vizinhos(m).some((o) => Math.abs(o.x - m.x) < 34);
@@ -256,7 +261,7 @@
       }
     } else if (m.estado === "acao") {
       m.tA += dt;
-      if ((m.acao === "pulinhos" || m.acao === "comemora") && m.vy === 0 && m.y === m.chao && m.tA < m.durA - 0.3 && m.tA - m.ult > 0.34) { m.vy = m.acao === "comemora" ? -170 : -120; m.sq = -0.45; m.ult = m.tA; }
+      if (m.acao === "pulinhos" && m.vy === 0 && m.y === m.chao && m.tA < m.durA - 0.3 && m.tA - m.ult > 0.34) { m.vy = -120; m.sq = -0.45; m.ult = m.tA; }
       if (m.acao === "olha") m.face = Math.floor(m.tA / 0.55) % 2 ? -m.face0 : m.face0;
       if (m.tA > m.durA) fimAcao(m);
     } else if (m.estado === "susto") {
@@ -266,9 +271,18 @@
         const r = el.getBoundingClientRect(), cx = r.left + r.width / 2;
         m.alvo = m.espia ? -30 : (m.fugaX < cx ? b : a); m.vmax = m.espia ? 150 : 165; m.estado = "corre";
       }
-    } else if (m.estado === "pega") {
-      if (!gota) m.estado = "parado";
-      else m.alvo = Math.min(b, Math.max(a, gota.x - 22));
+    } else if (m.estado === "alegria") {
+      // começou a chover: corações nos olhos e pulos altos por um momento
+      m.tA += dt;
+      if (m.vy === 0 && m.y === m.chao && m.tA < 1.3 && m.tA - m.ult > 0.3) { m.vy = -220; m.sq = -0.6; m.ult = m.tA; }
+      if (m.tA > 1.6) { el.classList.remove("amor"); m.estado = "feliz"; m.alvo = m.x; }
+    } else if (m.estado === "feliz") {
+      // corre de um lado para o outro na chuva, dando pulinhos
+      if (chuva.fase !== "chove") { m.estado = "parado"; m.espera = rnd(1, 3); }
+      else {
+        if (Math.abs(m.alvo - m.x) < 10) { let n; do n = rnd(a, b); while (Math.abs(n - m.x) < 60 && b - a > 120); m.alvo = n; m.vmax = rnd(70, 100); }
+        if (m.vy === 0 && m.y === 0 && Math.random() < dt * 0.9) { m.vy = -150; m.sq = -0.4; }
+      }
     } else if (m.estado === "briga") {
       const g = m.briga, o = g.outro; g.t += dt;
       if (g.t > 4) { m.estado = "parado"; m.chao = 0; m.briga = null; el.style.zIndex = ""; }
@@ -288,7 +302,7 @@
         }
       }
     }
-    if (m.estado === "anda" || m.estado === "corre" || m.estado === "pega") {
+    if (m.estado === "anda" || m.estado === "corre" || m.estado === "feliz") {
       const dx = m.alvo - m.x, quer = Math.sign(dx) * Math.min(m.vmax, Math.abs(dx) * 3.5);
       m.v += (quer - m.v) * Math.min(1, dt * (m.estado === "anda" ? 4 : 9));
       if (Math.abs(dx) < 0.6 && Math.abs(m.v) < 3) {
@@ -298,7 +312,7 @@
           setTimeout(() => el.classList.remove("assustado"), m.espia ? 2400 : 900);
           if (m.espia) m.espera = 0;
         }
-        if (m.estado !== "pega") { m.estado = "parado"; m.espera = m.espia ? rnd(2, 4) : rnd(1.5, 4.5); }
+        if (m.estado !== "feliz") { m.estado = "parado"; m.espera = m.espia ? rnd(2, 4) : rnd(1.5, 4.5); }
       }
     } else if (m.estado !== "briga" || !m.briga || !m.briga.pulou) m.v *= Math.exp(-dt * 8);
     m.x += m.v * dt;
@@ -317,7 +331,6 @@
       const e = Math.sin(Math.PI * Math.min(1, m.tA / m.durA));
       if (m.acao === "espreguica") resp += e * 0.2;
       if (m.acao === "danca") { incl += Math.sin(m.tA * 9) * 11 * e; bob -= Math.abs(Math.sin(m.tA * 9)) * 2.5 * e; }
-      if (m.acao === "triste") { resp -= 0.09 * e; incl += 6 * e; }
     }
     if (m.estado === "briga" && m.briga) {
       const g = m.briga;
@@ -330,41 +343,94 @@
     m.tronco.style.transform = `translateY(${bob.toFixed(2)}px) rotate(${incl.toFixed(2)}deg) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`;
     m.pes[0].style.transform = `translateY(${(-Math.max(0, s) * 2.6 * anda).toFixed(2)}px)`;
     m.pes[1].style.transform = `translateY(${(-Math.max(0, -s) * 2.6 * anda).toFixed(2)}px)`;
-    // olhar: segue o dedo; na disputa olha a gotinha; na briga, o outro
+    // olhar: segue o dedo; na briga, olha o outro
     const r = el.getBoundingClientRect(); let tx = px, ty = py;
-    if (m.estado === "pega" && gota) { const q = gota.el.getBoundingClientRect(); tx = q.left + 5; ty = q.top; }
-    else if (m.estado === "briga" && m.briga) { const q = m.briga.outro.el.getBoundingClientRect(); tx = q.left + 22; ty = q.top + 30; }
+    if (m.estado === "briga" && m.briga) { const q = m.briga.outro.el.getBoundingClientRect(); tx = q.left + 22; ty = q.top + 30; }
     const ox = tx - (r.left + r.width / 2), oy = ty - (r.top + r.height / 2), d = Math.hypot(ox, oy) || 1;
     const k = tx < -1e3 ? 0 : 1;
     m.olhos.style.transform = `translate(${((ox / d) * 1.7 * k * Math.sign(m.f || 1)).toFixed(2)}px, ${((oy / d) * 1.3 * k).toFixed(2)}px)`;
   };
 
-  // Gotinha: cai devagar no rodapé e os bichos disputam quem pega primeiro
-  const gotinha = (dt, t) => {
-    if (!gota) {
-      if (noite() || !doChao.length || (proxGota -= dt) > 0) return;
-      const w = chaoEl.clientWidth, el = document.createElement("span");
-      el.className = "gotinha";
-      el.innerHTML = '<svg viewBox="0 0 10 14" aria-hidden="true"><path d="M5 0Q10 7 9 9.5A4 4 0 0 1 1 9.5Q0 7 5 0Z" fill="#9FD3FF"/></svg>';
-      chaoEl.appendChild(el);
-      gota = { el, x0: rnd(24, w - 24), x: 0, y: -120 };
-      doChao.forEach((m) => { if (livre(m)) { m.el.classList.remove("fecha"); m.estado = "pega"; m.vmax = rnd(70, 100); } });
-      return;
+  // Chuva: de vez em quando chegam nuvens de quadradinhos e chove no chão do rodapé
+  const ceu = document.createElement("canvas");
+  ceu.className = "ceu"; ceu.setAttribute("aria-hidden", "true");
+  chaoEl.parentElement.insertBefore(ceu, chaoEl);
+  const g2 = ceu.getContext("2d"), TILE = 7, GAP = 2, ultimo = document.querySelector("main .slot:last-child .link");
+  let H = 40, BASE = 30;
+  const suave = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
+  const novaNuvem = (W, i, n) => {
+    const cols = Math.floor(rnd(7, 11)), w = cols * (TILE + GAP);
+    const b1 = 1 + Math.floor(rnd(0, 2)), b2 = cols - 3 - Math.floor(rnd(0, 2));
+    const linhas = [[0, cols], [1, cols - 1], b2 - b1 >= 3 ? [b1, b1 + 2, b2, b2 + 2] : [b1, b1 + 3]];
+    const alvo = (W / (n + 1)) * (i + 1) - w / 2 + rnd(-20, 20);
+    const lado = Math.random() < 0.5 ? -1 : 1;
+    return { cols, w, linhas, alvo, de: lado < 0 ? -w - 10 : W + 10, para: lado < 0 ? W + 10 : -w - 10, x: 0, fase: rnd(0, 6) };
+  };
+  const chover = (dt, t) => {
+    // o céu ocupa o espaço entre o último botão e o chão dos mascotes
+    const W = ceu.clientWidth, dpr = devicePixelRatio || 1;
+    const vao = Math.max(40, Math.round(chaoEl.getBoundingClientRect().bottom - ultimo.getBoundingClientRect().bottom));
+    if (vao !== H) { H = vao; ceu.style.height = H + "px"; }
+    BASE = Math.min(H - 12, 4 + 3 * (TILE + GAP));
+    if (ceu.width !== Math.round(W * dpr) || ceu.height !== H * dpr) { ceu.width = Math.round(W * dpr); ceu.height = H * dpr; }
+    const c = chuva;
+    if (c.fase === "nada") {
+      if (noite() || !doChao.length || (c.prox -= dt) > 0) { if (c.limpo) return; }
+      else if (Math.random() < 0.5) {
+        const n = W > 300 ? 3 : 2;
+        c.nuvens = Array.from({ length: n }, (_, i) => novaNuvem(W, i, n)); c.fase = "chega"; c.t = 0; c.dur = rnd(12, 18);
+      } else c.prox = rnd(20, 40);
+    } else {
+      c.t += dt;
+      if (c.fase === "chega" && c.t > 1.6) {
+        c.fase = "chove"; c.t = 0;
+        doChao.forEach((m) => {
+          if (["parado", "anda", "acao", "feliz"].includes(m.estado)) {
+            m.el.classList.remove("fecha", "dorme"); m.el.classList.add("amor");
+            m.estado = "alegria"; m.tA = 0; m.ult = -1; m.v *= 0.3;
+          }
+        });
+      } else if (c.fase === "chove" && c.t > c.dur) { c.fase = "vai"; c.t = 0; }
+      else if (c.fase === "vai" && c.t > 1.8 && !c.gotas.length) { c.fase = "nada"; c.nuvens = []; c.prox = rnd(30, 60); }
     }
-    gota.y += 42 * dt; gota.x = gota.x0 + Math.sin(t * 2.6) * 4;
-    gota.el.style.transform = `translate(${(gota.x - 5).toFixed(1)}px, ${gota.y.toFixed(1)}px)`;
-    const corredores = doChao.filter((m) => m.estado === "pega");
-    let fim = false;
-    if (gota.y >= -30) {
-      const pegou = corredores.find((m) => Math.abs(m.x + 22 - gota.x) < 13 && m.y === 0);
-      if (pegou) { iniciaAcao(pegou, "comemora"); pegou.sq = 0.5; corredores.filter((m) => m !== pegou).forEach((m) => iniciaAcao(m, "triste")); fim = true; }
+    // gotas e respingos
+    if (c.fase === "chove") {
+      const taxa = 26 * Math.min(1, c.t / 1.5);
+      for (let k = 0; k < taxa * dt * 2; k++) if (Math.random() < 0.5) {
+        const nv = c.nuvens[Math.floor(Math.random() * c.nuvens.length)];
+        c.gotas.push({ x: nv.x + rnd(4, nv.w - 4), y: BASE, v: rnd(210, 260) });
+      }
     }
-    if (!fim && gota.y >= -6) { gota.el.classList.add("splash"); corredores.forEach((m) => iniciaAcao(m, "triste")); fim = true; }
-    if (fim) { const el = gota.el; setTimeout(() => el.remove(), 300); if (!el.classList.contains("splash")) el.remove(); gota = null; proxGota = rnd(22, 38); }
+    c.gotas.forEach((d) => { d.y += d.v * dt; });
+    c.gotas = c.gotas.filter((d) => { if (d.y < H) return true; c.respingos.push({ x: d.x, t: 0 }); return false; });
+    c.respingos.forEach((r) => (r.t += dt)); c.respingos = c.respingos.filter((r) => r.t < 0.28);
+    // desenho
+    g2.setTransform(dpr, 0, 0, dpr, 0, 0); g2.clearRect(0, 0, W, H);
+    c.limpo = !c.nuvens.length && !c.gotas.length && !c.respingos.length;
+    if (c.limpo) return;
+    const pos = c.fase === "chega" ? suave(c.t / 1.6) : c.fase === "vai" ? 1 + suave(c.t / 1.8) : 1;
+    c.nuvens.forEach((nv) => {
+      nv.x = pos <= 1 ? nv.de + (nv.alvo - nv.de) * pos : nv.alvo + (nv.para - nv.alvo) * (pos - 1);
+      nv.x += Math.sin(t * 0.4 + nv.fase) * 3;
+      nv.linhas.forEach((faixas, r) => {
+        g2.fillStyle = r === 2 ? "#5A6270" : r === 1 ? "#4A515D" : "#3C424C";
+        for (let q = 0; q < faixas.length; q += 2) for (let k = faixas[q]; k < faixas[q + 1]; k++) {
+          g2.beginPath(); g2.roundRect(nv.x + k * (TILE + GAP), BASE - (r + 1) * (TILE + GAP), TILE, TILE, 2.2); g2.fill();
+        }
+      });
+    });
+    g2.fillStyle = "#7FB8F0";
+    c.gotas.forEach((d) => { g2.beginPath(); g2.roundRect(d.x - 1, d.y - 7, 2, 7, 1); g2.fill(); });
+    c.respingos.forEach((r) => {
+      const k = r.t / 0.28; g2.globalAlpha = 1 - k;
+      g2.fillRect(r.x - 2 - k * 5, H - 2 - k * 4, 2, 2); g2.fillRect(r.x + k * 5, H - 2 - k * 4, 2, 2);
+      g2.globalAlpha = 1;
+    });
   };
 
   // Briga: dois bichos do rodapé se encontram, um sobe no outro e empurra
   const brigas = (t) => {
+    if (chuva.fase !== "nada") return; // na chuva ninguém briga
     for (let i = 0; i < doChao.length; i++) for (let j = i + 1; j < doChao.length; j++) {
       const p = doChao[i], q = doChao[j], chave = i + "-" + j;
       if ((pausas.get(chave) || 0) > t || noite()) continue;
@@ -384,7 +450,7 @@
   let ant = performance.now();
   const loop = (agora) => {
     const dt = Math.min(0.05, (agora - ant) / 1000), t = agora / 1000; ant = agora;
-    brigas(t); gotinha(dt, t);
+    brigas(t); chover(dt, t);
     bichos.forEach((m) => passo(m, dt, t));
     requestAnimationFrame(loop);
   };
