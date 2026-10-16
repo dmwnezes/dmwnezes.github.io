@@ -243,7 +243,7 @@
   const doChao = bichos.filter((m) => m.trilha === chaoEl);
 
   // ---------- ações de um Broto só ----------
-  const DUR = { pulinhos: 1.2, espreguica: 1.7, olha: 2.2, danca: 2.2, cochilo: 3.5, tropeco: 2.1, espirro: 1.5, rega: 2.9, helice: 2.0, aceno: 2.0, acena: 2.4 };
+  const DUR = { pulinhos: 1.2, espreguica: 1.7, olha: 2.2, danca: 2.2, cochilo: 3.5, espirro: 1.5, rega: 2.9, helice: 2.0, aceno: 2.0, acena: 2.4 };
   const limpa = (m) => {
     m.el.classList.remove("fecha", "vergonha", "acena");
     [m.folha, m.topete, m.mao, ...m.orelhas].forEach((n) => n && n.removeAttribute("transform"));
@@ -278,10 +278,6 @@
     const el = m.el, cl = el.classList, n = m.acao, T = (m.tA += dt);
     if (n === "pulinhos" && m.vy === 0 && m.y === m.chao && T < m.durA - 0.3 && T - m.ult > 0.34) { m.vy = -120; m.sq = -0.45; m.ult = T; }
     if (n === "olha") m.face = Math.floor(T / 0.55) % 2 ? -m.face0 : m.face0;
-    if (n === "tropeco") {
-      cl.toggle("fecha", T > 0.25 && T < 0.9);
-      if (T > 1.1) { cl.add("vergonha"); m.face = Math.floor((T - 1.15) / 0.45) % 2 ? -m.face0 : m.face0; }
-    }
     if (n === "espirro") {
       cl.toggle("fecha", T > 0.35 && T < 0.95);
       if (!m.feito && T >= 0.7) {
@@ -377,8 +373,7 @@
         }
       }
     } else if (m.estado === "anda") {
-      if (!m.espia && m.y === 0 && Math.abs(m.v) > 12 && Math.random() < dt * 0.035) iniciaAcao(m, "tropeco");
-      else if (m.assobia && (m.nota = (m.nota || 0) - dt) <= 0) {
+      if (m.assobia && (m.nota = (m.nota || 0) - dt) <= 0) {
         m.nota = 0.5;
         fx(m, NOTA, m.face * 5, -36, [{ transform: "translate(0,0)", opacity: 1 }, { transform: `translate(${rnd(-7, 7)}px, -20px)`, opacity: 0 }], 1100);
       }
@@ -448,7 +443,7 @@
     if (m.vy || m.y < m.chao - 0.01) { m.vy += 1100 * dt; m.y += m.vy * dt; if (m.y >= m.chao && m.vy >= 0) { m.y = m.chao; m.vy = 0; m.sq = 0.55; } }
     m.sq *= Math.exp(-dt * 9);
     const vel = Math.abs(m.v), anda = m.y < m.chao - 0.5 ? 0 : Math.min(1, vel / 28);
-    if (!m.espia && vel > 4 && m.estado !== "briga" && m.estado !== "torre" && m.acao !== "tropeco" && m.acao !== "espirro") m.face = Math.sign(m.v);
+    if (!m.espia && vel > 4 && m.estado !== "briga" && m.estado !== "torre" && m.acao !== "espirro") m.face = Math.sign(m.v);
     m.f += (m.face - m.f) * Math.min(1, dt * 10);
     m.fase += dt * (5 + vel * 0.22);
     const s = Math.sin(m.fase);
@@ -459,7 +454,6 @@
       const T = m.tA, e = Math.sin(Math.PI * Math.min(1, T / m.durA));
       if (m.acao === "espreguica") resp += e * 0.2;
       if (m.acao === "danca") { incl += Math.sin(T * 9) * 11 * e; bob -= Math.abs(Math.sin(T * 9)) * 2.5 * e; }
-      if (m.acao === "tropeco") { const q = T < 0.25 ? suave(T / 0.25) : T < 0.9 ? 1 : 1 - suave((T - 0.9) / 0.25); incl += 82 * q; bob += 3 * q; }
       if (m.acao === "espirro" && T < 0.7) { resp += 0.13 * suave(T / 0.7); incl -= 7 * suave(T / 0.7); }
       if (m.acao === "aceno") incl += Math.sin(T * 14) * 3;
     }
