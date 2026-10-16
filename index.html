@@ -80,7 +80,46 @@
   footer a:hover, footer a:focus-visible { color: var(--text); outline: none; }
   .insta { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; }
   footer a:hover .insta, footer a:focus-visible .insta { background: var(--surface-high); box-shadow: 0 0 0 2px var(--accent); }
-  @media (prefers-reduced-motion: reduce) { .flag i { animation: none; } .link, .arrow { transition: none; } .link:hover { transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .flag i, #b3, #b3 .corpo, .broto svg, .broto .sprout { animation: none !important; } .link, .arrow { transition: none; } .link:hover { transform: none; } }
+
+  /* Broto: o mascote (M2). Fica pelo site e reage ao toque. */
+  html, body { overflow-x: clip; }
+  .slot { position: relative; }
+  .slot .link { position: relative; z-index: 1; }
+  footer { position: relative; }
+  .broto {
+    position: absolute; width: 44px; height: 44px; padding: 0; border: 0; background: none;
+    display: grid; place-items: center; cursor: pointer; z-index: 2; -webkit-tap-highlight-color: transparent;
+  }
+  .broto:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 12px; }
+  .broto .corpo { display: block; }
+  .broto svg { display: block; width: 26px; height: 33px; overflow: visible; transition: transform .25s ease; }
+  .broto .olhos { transition: transform .12s linear; }
+  .broto .closed, .broto .zzz { display: none; }
+  .broto.blink .open, .broto.sleep .open { display: none; }
+  .broto.blink .closed, .broto.sleep .closed, .broto.sleep .zzz { display: inline; }
+  .broto.pula svg { animation: pula .55s ease; }
+  .broto.gira .sprout { transform-box: fill-box; transform-origin: 0% 100%; animation: gira .7s ease; }
+  .broto.treme svg { animation: treme .4s linear; }
+  .broto.some svg { transform: scale(0); }
+  .bubble {
+    position: absolute; bottom: 100%; left: 50%; transform: translate(-50%, 4px);
+    white-space: nowrap; background: var(--text); color: var(--bg); font: 600 12px Sora, system-ui, sans-serif;
+    padding: 6px 10px; border-radius: 12px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+  }
+  .bubble.on { opacity: 1; transform: translate(-50%, -2px); }
+  #b1 { right: 56px; top: -37px; }
+  #b2 { right: -24px; top: 50%; margin-top: -22px; z-index: 0; }
+  #b2 svg { transform: rotate(14deg); }
+  #b2 .bubble { left: auto; right: 0; transform: translate(0, 4px); }
+  #b2 .bubble.on { transform: translate(0, -2px); }
+  #b3 { left: -54px; bottom: 0; animation: passeio 10s ease-in-out infinite; }
+  #b3 .corpo { animation: vira 10s steps(1) infinite; }
+  @keyframes passeio { 0%, 100% { transform: translateX(0); } 45%, 50% { transform: translateX(-34px); } }
+  @keyframes vira { 0% { transform: scaleX(-1); } 50% { transform: scaleX(1); } }
+  @keyframes pula { 0%, 100% { transform: none; } 20% { transform: scale(1.15, .85); } 50% { transform: translateY(-14px) scale(.95, 1.05); } 80% { transform: scale(1.1, .9); } }
+  @keyframes gira { to { transform: rotate(360deg); } }
+  @keyframes treme { 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
 </style>
 </head>
 <body>
@@ -92,6 +131,7 @@
 </header>
 
 <main>
+  <div class="slot">
   <a class="link" href="/termo/">
     <span class="ico i-palavreiro" aria-hidden="true">
       <i style="background:#5FB873"></i><i style="background:#E6C14F"></i><i style="background:#5FB873"></i><i style="background:#3A3363"></i>
@@ -99,7 +139,20 @@
     <span class="txt"><b>Palavreiro</b><small>Jogos de palavras</small></span>
     <span class="arrow" aria-hidden="true">→</span>
   </a>
+  <button class="broto" id="b1" type="button" aria-label="Broto, o mascote. Toque para interagir">
+    <span class="corpo"><svg viewBox="0 -6 40 50" aria-hidden="true">
+      <g class="sprout"><path d="M20 3 C19 -2 23 -5 28 -4 C27 0 24 2 20 3Z" fill="#5FB873"/><path d="M20 3V0" stroke="#3E8A50" stroke-width="1.6" stroke-linecap="round"/></g>
+      <rect x="9" y="34" width="7" height="6" rx="3" fill="#B8962F"/><rect x="24" y="34" width="7" height="6" rx="3" fill="#B8962F"/>
+      <rect x="2" y="2" width="36" height="34" rx="11" fill="#E6C14F"/>
+      <circle cx="9" cy="25" r="3" fill="#F2A0A0" opacity=".85"/><circle cx="31" cy="25" r="3" fill="#F2A0A0" opacity=".85"/>
+      <g class="open"><g class="olhos"><circle cx="14" cy="18" r="2.7" fill="#101216"/><circle cx="26" cy="18" r="2.7" fill="#101216"/></g></g>
+      <path class="closed" d="M10 17q4 3.5 8 0M22 17q4 3.5 8 0" fill="none" stroke="#101216" stroke-width="2.2" stroke-linecap="round"/>
+      <g class="zzz" fill="#9AA0AA" font-family="Sora, sans-serif" font-weight="700"><text x="31" y="0" font-size="8">z</text><text x="35" y="-4" font-size="6">z</text></g>
+    </svg></span><span class="bubble" aria-live="polite"></span>
+  </button>
+  </div>
 
+  <div class="slot">
   <a class="link" href="/politica/">
     <span class="ico i-bussola" aria-hidden="true">
       <svg width="34" height="34" viewBox="0 0 96 96" fill="none"><circle cx="48" cy="48" r="38" stroke="#2B2A27" stroke-width="6"/><path d="M48 48 63 29 52 52Z" fill="#9C7A45"/><path d="M48 48 33 67 44 44Z" fill="#8A857C"/></svg>
@@ -107,17 +160,84 @@
     <span class="txt"><b>Bússola Política</b><small>Descubra sua posição</small></span>
     <span class="arrow" aria-hidden="true">→</span>
   </a>
+  <button class="broto espia" id="b2" type="button" aria-label="Broto, o mascote. Toque para interagir">
+    <span class="corpo"><svg viewBox="0 -6 40 50" aria-hidden="true">
+      <g class="sprout"><path d="M20 3 C19 -2 23 -5 28 -4 C27 0 24 2 20 3Z" fill="#5FB873"/><path d="M20 3V0" stroke="#3E8A50" stroke-width="1.6" stroke-linecap="round"/></g>
+      <rect x="9" y="34" width="7" height="6" rx="3" fill="#B8962F"/><rect x="24" y="34" width="7" height="6" rx="3" fill="#B8962F"/>
+      <rect x="2" y="2" width="36" height="34" rx="11" fill="#E6C14F"/>
+      <circle cx="9" cy="25" r="3" fill="#F2A0A0" opacity=".85"/><circle cx="31" cy="25" r="3" fill="#F2A0A0" opacity=".85"/>
+      <g class="open"><g class="olhos"><circle cx="14" cy="18" r="2.7" fill="#101216"/><circle cx="26" cy="18" r="2.7" fill="#101216"/></g></g>
+      <path class="closed" d="M10 17q4 3.5 8 0M22 17q4 3.5 8 0" fill="none" stroke="#101216" stroke-width="2.2" stroke-linecap="round"/>
+      <g class="zzz" fill="#9AA0AA" font-family="Sora, sans-serif" font-weight="700"><text x="31" y="0" font-size="8">z</text><text x="35" y="-4" font-size="6">z</text></g>
+    </svg></span><span class="bubble" aria-live="polite"></span>
+  </button>
+  </div>
 
+  <div class="slot">
   <a class="link" href="/candidatos/">
     <span class="ico i-cegas" aria-hidden="true">?</span>
     <span class="txt"><b>Propostas às Cegas</b><small>Presidência 2026</small></span>
     <span class="arrow" aria-hidden="true">→</span>
   </a>
+  </div>
 </main>
 
-<footer><a href="https://instagram.com/dmwnezes" target="_blank" rel="noopener">
+<footer>
+  <button class="broto passeia" id="b3" type="button" aria-label="Broto, o mascote. Toque para interagir">
+    <span class="corpo"><svg viewBox="0 -6 40 50" aria-hidden="true">
+      <g class="sprout"><path d="M20 3 C19 -2 23 -5 28 -4 C27 0 24 2 20 3Z" fill="#5FB873"/><path d="M20 3V0" stroke="#3E8A50" stroke-width="1.6" stroke-linecap="round"/></g>
+      <rect x="9" y="34" width="7" height="6" rx="3" fill="#B8962F"/><rect x="24" y="34" width="7" height="6" rx="3" fill="#B8962F"/>
+      <rect x="2" y="2" width="36" height="34" rx="11" fill="#E6C14F"/>
+      <circle cx="9" cy="25" r="3" fill="#F2A0A0" opacity=".85"/><circle cx="31" cy="25" r="3" fill="#F2A0A0" opacity=".85"/>
+      <g class="open"><g class="olhos"><circle cx="14" cy="18" r="2.7" fill="#101216"/><circle cx="26" cy="18" r="2.7" fill="#101216"/></g></g>
+      <path class="closed" d="M10 17q4 3.5 8 0M22 17q4 3.5 8 0" fill="none" stroke="#101216" stroke-width="2.2" stroke-linecap="round"/>
+      <g class="zzz" fill="#9AA0AA" font-family="Sora, sans-serif" font-weight="700"><text x="31" y="0" font-size="8">z</text><text x="35" y="-4" font-size="6">z</text></g>
+    </svg></span><span class="bubble" aria-live="polite"></span>
+  </button>
+  <a href="https://instagram.com/dmwnezes" target="_blank" rel="noopener">
   <span class="insta" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F1F2F4" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></span>
   criado por: @dmwnezes
 </a></footer>
+<script>
+// Broto: olhos seguem o dedo/mouse, pisca sozinho, dorme de 0h a 5h e reage ao toque.
+(() => {
+  const brotos = [...document.querySelectorAll(".broto")];
+  const falas = ["oi!", "bora um Termo?", "tô de olho em você", "psiu!", "me rega, por favor", "BROTO tem 5 letras", "Vai, Fortaleza!", "cuidado, eu mordo", "já votou às cegas?"];
+  const dormindo = () => new Date().getHours() < 5;
+  const anim = (b, cls, ms) => { b.classList.remove(cls); void b.offsetWidth; b.classList.add(cls); setTimeout(() => b.classList.remove(cls), ms); };
+  const fala = (b, txt) => {
+    const el = b.querySelector(".bubble"); el.textContent = txt; el.classList.add("on");
+    clearTimeout(b._fala); b._fala = setTimeout(() => el.classList.remove("on"), 1800);
+  };
+  brotos.forEach((b) => {
+    b._toques = 0;
+    b.classList.toggle("sleep", dormindo());
+    (function piscar() {
+      setTimeout(() => { if (!b.classList.contains("sleep")) anim(b, "blink", 160); piscar(); }, 2500 + Math.random() * 4000);
+    })();
+    b.addEventListener("click", () => {
+      if (b.classList.contains("sleep")) {
+        b.classList.remove("sleep"); anim(b, "pula", 550); fala(b, "hã? tô acordado!");
+        setTimeout(() => b.classList.toggle("sleep", dormindo()), 5000); return;
+      }
+      b._toques++; clearTimeout(b._zera); b._zera = setTimeout(() => (b._toques = 0), 2500);
+      if (b._toques >= 5) {
+        b._toques = 0; fala(b, "chega! vou me esconder"); anim(b, "treme", 400);
+        setTimeout(() => b.classList.add("some"), 600);
+        setTimeout(() => { b.classList.remove("some"); fala(b, "voltei :)"); }, 3500); return;
+      }
+      anim(b, ["pula", "gira", "pula", "treme"][Math.floor(Math.random() * 4)], 700);
+      fala(b, falas[Math.floor(Math.random() * falas.length)]);
+    });
+  });
+  addEventListener("pointermove", (e) => {
+    brotos.forEach((b) => {
+      const r = b.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      const d = Math.hypot(dx, dy) || 1;
+      b.querySelector(".olhos").style.transform = `translate(${(dx / d) * 1.8}px, ${(dy / d) * 1.4}px)`;
+    });
+  }, { passive: true });
+})();
+</script>
 </body>
 </html>
