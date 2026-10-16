@@ -39,25 +39,25 @@
     min-height: 100vh; min-height: 100dvh;
     font-family: Sora, system-ui, sans-serif; color: var(--text); background: var(--bg);
     display: flex; flex-direction: column; align-items: center;
-    padding: 56px 16px 28px;
+    padding: clamp(16px, 4.5vh, 56px) 16px clamp(12px, 2.5vh, 28px);
   }
 
   /* Bandeira do Brasil em quadradinhos (a mesma da abertura do Palavreiro), tremulando em loop */
-  .flag { display: grid; grid-template-columns: repeat(7, 8px); gap: 2px; margin-bottom: 28px; }
+  .flag { display: grid; grid-template-columns: repeat(7, 8px); gap: 2px; margin-bottom: clamp(12px, 3vh, 28px); }
   .flag i { width: 8px; height: 8px; border-radius: 2.5px; background: #5FB873;
             animation: tremula 1.26s ease-in-out infinite; animation-delay: calc(var(--c) * -0.14s); }
   .flag i.y { background: #E6C14F; } .flag i.b { background: #4A72CF; }
   @keyframes tremula { 0%, 100% { transform: translateY(-1.6px); } 50% { transform: translateY(1.6px); } }
   .avatar {
-    width: 104px; height: 104px; border-radius: 50%; object-fit: cover;
+    width: clamp(68px, 12.5vh, 104px); height: clamp(68px, 12.5vh, 104px); border-radius: 50%; object-fit: cover;
     box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--accent);
   }
-  h1 { font-size: 22px; font-weight: 700; margin-top: 20px; }
+  h1 { font-size: 22px; font-weight: 700; margin-top: clamp(10px, 2.2vh, 20px); }
   .sub { font-size: 14px; color: var(--muted); margin-top: 6px; }
 
-  main { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 12px; margin-top: 32px; }
+  main { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: clamp(8px, 1.4vh, 12px); margin-top: clamp(16px, 3.5vh, 32px); }
   .link {
-    display: flex; align-items: center; gap: 14px; padding: 14px;
+    display: flex; align-items: center; gap: 14px; padding: clamp(9px, 1.6vh, 14px) 14px;
     border-radius: 22px; background: var(--surface); color: inherit; text-decoration: none;
     transition: transform .2s ease, background .2s ease;
   }
@@ -75,15 +75,11 @@
   .i-bussola { background: #E6E3DD; }
   .i-cegas { background: #262A35; color: #D8B45A; font-size: 24px; font-weight: 700; }
 
-  .insta {
-    margin-top: 24px; width: 48px; height: 48px; border-radius: 50%;
-    background: var(--surface); display: grid; place-items: center;
-  }
-  .insta:hover, .insta:focus-visible { background: var(--surface-high); outline: none; box-shadow: 0 0 0 2px var(--accent); }
-
-  footer { margin-top: auto; padding-top: 40px; font-size: 13px; color: var(--muted); }
-  footer a { color: inherit; text-decoration: none; }
-  footer a:hover { color: var(--text); }
+  footer { margin-top: auto; padding-top: clamp(16px, 3.5vh, 40px); font-size: 13px; color: var(--muted); }
+  footer a { display: flex; align-items: center; gap: 10px; min-height: 44px; color: inherit; text-decoration: none; }
+  footer a:hover, footer a:focus-visible { color: var(--text); outline: none; }
+  .insta { width: 36px; height: 36px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; }
+  footer a:hover .insta, footer a:focus-visible .insta { background: var(--surface-high); box-shadow: 0 0 0 2px var(--accent); }
   @media (prefers-reduced-motion: reduce) { .flag i { animation: none; } .link, .arrow { transition: none; } .link:hover { transform: none; } }
 </style>
 </head>
@@ -119,10 +115,9 @@
   </a>
 </main>
 
-<a class="insta" href="https://instagram.com/dmwnezes" target="_blank" rel="noopener" aria-label="Instagram @dmwnezes">
-  <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F1F2F4" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
-</a>
-
-<footer><a href="https://instagram.com/dmwnezes" target="_blank" rel="noopener">criado por: @dmwnezes</a></footer>
+<footer><a href="https://instagram.com/dmwnezes" target="_blank" rel="noopener">
+  <span class="insta" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F1F2F4" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></span>
+  criado por: @dmwnezes
+</a></footer>
 </body>
 </html>
