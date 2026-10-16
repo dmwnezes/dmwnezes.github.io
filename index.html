@@ -40,7 +40,9 @@
     font-family: Sora, system-ui, sans-serif; color: var(--text); background: var(--bg);
     display: flex; flex-direction: column; align-items: center;
     padding: clamp(16px, 4.5vh, 56px) 16px clamp(12px, 2.5vh, 28px);
+    transition: background-color .25s ease-out;
   }
+  html.clarao body { background: #23272F; transition: none; }
 
   /* Bandeira do Brasil em quadradinhos (a mesma da abertura do Palavreiro), tremulando em loop */
   .flag { display: grid; grid-template-columns: repeat(7, 8px); gap: 2px; margin-bottom: clamp(12px, 3vh, 28px); }
@@ -187,6 +189,15 @@
   let px = -1e4, py = -1e4;
   addEventListener("pointermove", (e) => { px = e.clientX; py = e.clientY; }, { passive: true });
 
+  // susto: treme, pula e foge para longe de x (na tela); quem espia se esconde
+  const assusta = (m, x) => {
+    if (m.estado === "susto" || m.estado === "corre" || m.estado === "briga") return;
+    const el = m.el;
+    if (reduz) { el.classList.add("assustado"); setTimeout(() => el.classList.remove("assustado"), 700); return; }
+    el.classList.remove("dorme", "pisca", "fecha", "amor"); el.classList.add("assustado");
+    m.estado = "susto"; m.tS = 0; m.pulou = false; m.sq = 0.6; m.fugaX = x;
+  };
+
   const bichos = [...document.querySelectorAll(".bicho")].map((el, i) => {
     el.innerHTML = desenho(F[el.dataset.forma]);
     const espia = el.classList.contains("espia"), trilha = el.parentElement;
@@ -200,12 +211,7 @@
       x: espia ? 6 : a + (b - a) * [0.7, 0.15, 0.5, 0.85][i % 4], alvo: 0, v: 0, vmax: 26, f: 1, face: 1, fase: rnd(0, 6), y: 0, vy: 0, sq: 0, chao: 0,
       estado: "parado", espera: rnd(0.5, 3), tS: 0, pulou: false, cansado: 0, fugaX: 0, acao: "", tA: 0, durA: 0, briga: null };
     m.alvo = m.x;
-    el.addEventListener("click", (e) => {
-      if (m.estado === "susto" || m.estado === "corre" || m.estado === "briga") return;
-      if (reduz) { el.classList.add("assustado"); setTimeout(() => el.classList.remove("assustado"), 700); return; }
-      el.classList.remove("dorme", "pisca", "fecha"); el.classList.add("assustado");
-      m.estado = "susto"; m.tS = 0; m.pulou = false; m.sq = 0.6; m.fugaX = e.clientX;
-    });
+    el.addEventListener("click", (e) => assusta(m, e.clientX));
     (function piscar() { setTimeout(() => { if (!el.classList.contains("dorme") && !el.classList.contains("assustado")) { el.classList.add("pisca"); setTimeout(() => el.classList.remove("pisca"), 150); } piscar(); }, rnd(2200, 6000)); })();
     return m;
   });
@@ -355,23 +361,21 @@
   const ceu = document.createElement("canvas");
   ceu.className = "ceu"; ceu.setAttribute("aria-hidden", "true");
   chaoEl.parentElement.insertBefore(ceu, chaoEl);
-  const g2 = ceu.getContext("2d"), TILE = 7, GAP = 2, ultimo = document.querySelector("main .slot:last-child .link");
+  const g2 = ceu.getContext("2d"), ultimo = document.querySelector("main .slot:last-child .link");
   let H = 40, BASE = 30;
   const suave = (x) => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k); };
   const novaNuvem = (W, i, n) => {
-    const cols = Math.floor(rnd(7, 11)), w = cols * (TILE + GAP);
-    const b1 = 1 + Math.floor(rnd(0, 2)), b2 = cols - 3 - Math.floor(rnd(0, 2));
-    const linhas = [[0, cols], [1, cols - 1], b2 - b1 >= 3 ? [b1, b1 + 2, b2, b2 + 2] : [b1, b1 + 3]];
+    const w = rnd(70, 100);
     const alvo = (W / (n + 1)) * (i + 1) - w / 2 + rnd(-20, 20);
     const lado = Math.random() < 0.5 ? -1 : 1;
-    return { cols, w, linhas, alvo, de: lado < 0 ? -w - 10 : W + 10, para: lado < 0 ? W + 10 : -w - 10, x: 0, fase: rnd(0, 6) };
+    return { w, alvo, de: lado < 0 ? -w - 10 : W + 10, para: lado < 0 ? W + 10 : -w - 10, x: 0, fase: rnd(0, 6) };
   };
   const chover = (dt, t) => {
     // o céu ocupa o espaço entre o último botão e o chão dos mascotes
     const W = ceu.clientWidth, dpr = devicePixelRatio || 1;
     const vao = Math.max(40, Math.round(chaoEl.getBoundingClientRect().bottom - ultimo.getBoundingClientRect().bottom));
     if (vao !== H) { H = vao; ceu.style.height = H + "px"; }
-    BASE = Math.min(H - 12, 14 + 3 * (TILE + GAP)); // 14px de folga abaixo dos botões
+    BASE = Math.min(H - 12, 14 + 41); // 14px de folga abaixo dos botões + altura da nuvem
     if (ceu.width !== Math.round(W * dpr) || ceu.height !== H * dpr) { ceu.width = Math.round(W * dpr); ceu.height = H * dpr; }
     const c = chuva;
     if (c.fase === "nada") {
@@ -383,7 +387,7 @@
     } else {
       c.t += dt;
       if (c.fase === "chega" && c.t > 1.6) {
-        c.fase = "chove"; c.t = 0;
+        c.fase = "chove"; c.t = 0; c.proxRaio = rnd(3, 6);
         doChao.forEach((m) => {
           if (["parado", "anda", "acao", "feliz"].includes(m.estado)) {
             m.el.classList.remove("fecha", "dorme"); m.el.classList.add("amor");
@@ -392,6 +396,22 @@
         });
       } else if (c.fase === "chove" && c.t > c.dur) { c.fase = "vai"; c.t = 0; }
       else if (c.fase === "vai" && c.t > 1.8 && !c.gotas.length) { c.fase = "nada"; c.nuvens = []; c.prox = rnd(30, 60); }
+    }
+    // relâmpago: de vez em quando sai um raio de uma nuvem e assusta todos os mascotes do site
+    if (c.raio) { c.raio.t += dt; if (c.raio.t > 0.35) c.raio = null; }
+    if (c.fase === "chove" && (c.proxRaio -= dt) <= 0) {
+      c.proxRaio = rnd(4, 9);
+      if (Math.random() < 0.6 && c.nuvens.length) {
+        const nv = c.nuvens[Math.floor(Math.random() * c.nuvens.length)];
+        let rx = nv.x + nv.w * rnd(0.3, 0.7), ry = BASE - 2; const pts = [[rx, ry]];
+        while (ry < H) { ry = Math.min(H, ry + rnd(6, 11)); rx += rnd(-7, 7); pts.push([rx, ry]); }
+        c.raio = { t: 0, pts };
+        const de = document.documentElement;
+        de.classList.add("clarao"); setTimeout(() => de.classList.remove("clarao"), 70);
+        setTimeout(() => de.classList.add("clarao"), 140); setTimeout(() => de.classList.remove("clarao"), 220);
+        const xTela = ceu.getBoundingClientRect().left + pts[0][0];
+        bichos.forEach((m) => assusta(m, xTela));
+      }
     }
     // gotas e respingos
     if (c.fase === "chove") {
@@ -408,16 +428,19 @@
     g2.setTransform(dpr, 0, 0, dpr, 0, 0); g2.clearRect(0, 0, W, H);
     c.limpo = !c.nuvens.length && !c.gotas.length && !c.respingos.length;
     if (c.limpo) return;
+    const luz = c.raio && (c.raio.t < 0.08 || (c.raio.t > 0.14 && c.raio.t < 0.3)) ? 1 : 0;
     const pos = c.fase === "chega" ? suave(c.t / 1.6) : c.fase === "vai" ? 1 + suave(c.t / 1.8) : 1;
     c.nuvens.forEach((nv) => {
       nv.x = pos <= 1 ? nv.de + (nv.alvo - nv.de) * pos : nv.alvo + (nv.para - nv.alvo) * (pos - 1);
       nv.x += Math.sin(t * 0.4 + nv.fase) * 3;
-      nv.linhas.forEach((faixas, r) => {
-        g2.fillStyle = r === 2 ? "#5A6270" : r === 1 ? "#4A515D" : "#3C424C";
-        for (let q = 0; q < faixas.length; q += 2) for (let k = faixas[q]; k < faixas[q + 1]; k++) {
-          g2.beginPath(); g2.roundRect(nv.x + k * (TILE + GAP), BASE - (r + 1) * (TILE + GAP), TILE, TILE, 2.2); g2.fill();
-        }
-      });
+      // N2 · bolhas: base arredondada + três bolhas + brilho; acende no relâmpago
+      const x = nv.x, w = nv.w, aceso = luz > 0;
+      const bola = (cx, cy, r, cor) => { g2.fillStyle = cor; g2.beginPath(); g2.arc(cx, cy, r, 0, Math.PI * 2); g2.fill(); };
+      g2.fillStyle = aceso ? "#5C6472" : "#434A55"; g2.beginPath(); g2.roundRect(x, BASE - 18, w, 18, 9); g2.fill();
+      bola(x + w * 0.25, BASE - 18, w * 0.15, aceso ? "#646C7A" : "#4A515D");
+      bola(x + w * 0.5, BASE - 22, w * 0.19, aceso ? "#6A7280" : "#4E5562");
+      bola(x + w * 0.76, BASE - 17, w * 0.13, aceso ? "#646C7A" : "#4A515D");
+      g2.globalAlpha = 0.7; bola(x + w * 0.46, BASE - 27, w * 0.08, aceso ? "#8A92A0" : "#5A6270"); g2.globalAlpha = 1;
     });
     g2.fillStyle = "#7FB8F0";
     c.gotas.forEach((d) => { g2.beginPath(); g2.roundRect(d.x - 1, d.y - 7, 2, 7, 1); g2.fill(); });
@@ -426,6 +449,11 @@
       g2.fillRect(r.x - 2 - k * 5, H - 2 - k * 4, 2, 2); g2.fillRect(r.x + k * 5, H - 2 - k * 4, 2, 2);
       g2.globalAlpha = 1;
     });
+    if (luz) {
+      g2.save(); g2.strokeStyle = "#E6C14F"; g2.lineWidth = 3; g2.lineJoin = "round"; g2.lineCap = "round";
+      g2.shadowColor = "#E6C14F"; g2.shadowBlur = 10; g2.beginPath();
+      c.raio.pts.forEach(([px2, py2], k) => (k ? g2.lineTo(px2, py2) : g2.moveTo(px2, py2))); g2.stroke(); g2.restore();
+    }
   };
 
   // Briga: dois bichos do rodapé se encontram, um sobe no outro e empurra
