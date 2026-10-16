@@ -247,12 +247,17 @@
 
   // ---------- ações de um Broto só ----------
   const DUR = { pulinhos: 1.2, espreguica: 1.7, olha: 2.2, danca: 2.2, cochilo: 3.5, espirro: 1.5, rega: 2.9, helice: 2.0, aceno: 2.0, acena: 2.4, presente: 2.6, bolha: 3.2 };
-  // cada ação só se repete depois de um tempo (em segundos); cada Broto também espera entre uma ação e outra
-  const RECARGA = { pulinhos: 25, espreguica: 35, olha: 25, danca: 35, cochilo: 45, espirro: 40, borboleta: 50, rega: 60, helice: 50, presente: 60, acena: 30, bolha: 45 };
-  const pronto = new Map();
+  // sorteio com peso: a ação recém-feita fica com 15% da chance e volta ao normal aos poucos (~70% em 12s, ~90% em 25s)
+  const usadas = new Map();
   let agoraS = 0;
-  const disponivel = (n) => (pronto.get(n) || 0) <= agoraS;
-  const usa = (m, n) => { pronto.set(n, agoraS + (RECARGA[n] || 30)); m.proxAcao = agoraS + rnd(10, 18); };
+  const peso = (n, tau = 12) => 1 - 0.85 * Math.exp(-(agoraS - (usadas.has(n) ? usadas.get(n) : -1e9)) / tau);
+  const sorteia = (lista, tau) => {
+    const ps = lista.map((n) => peso(n, tau)), tot = ps.reduce((x, y) => x + y, 0);
+    let r = Math.random() * tot;
+    for (let k = 0; k < lista.length; k++) if ((r -= ps[k]) <= 0) return lista[k];
+    return lista[lista.length - 1];
+  };
+  const usa = (m, n) => { usadas.set(n, agoraS); m.proxAcao = agoraS + rnd(3, 7); };
   const limpa = (m) => {
     m.el.classList.remove("fecha", "vergonha", "acena");
     [m.folha, m.topete, m.mao, ...m.orelhas].forEach((n) => n && n.removeAttribute("transform"));
@@ -270,13 +275,12 @@
       { opacity: 1, transform: "rotate(-32deg)", offset: 0.3 }, { opacity: 1, transform: "rotate(-32deg)", offset: 0.8 },
       { opacity: 0, transform: "rotate(0deg)" }], 2800, "regador");
   };
-  const fimAcao = (m) => { limpa(m); m.estado = "parado"; m.espera = rnd(3, 6); };
+  const fimAcao = (m) => { limpa(m); m.estado = "parado"; m.espera = rnd(2, 4); };
   const sorteiaAcao = (m) => {
     const l = ["pulinhos", "espreguica", "olha", "danca", "cochilo", "espirro", "borboleta"];
-    if (m === B.broto) l.push("rega", "rega", "presente", "presente");
-    if (m === B.orelhudo) l.push("helice", "helice");
-    const ok = l.filter(disponivel);
-    return ok.length ? ok[Math.floor(Math.random() * ok.length)] : null;
+    if (m === B.broto) l.push("rega", "rega", "rega", "presente", "presente", "presente");
+    if (m === B.orelhudo) l.push("helice", "helice", "helice", "helice", "helice");
+    return sorteia(l);
   };
   const iniciaCaca = (m) => {
     const [a, b] = m.faixa();
@@ -350,14 +354,14 @@
   };
 
   // ---------- susto (toque e raio) ----------
-  let evento = null, proxEvento = rnd(25, 40);
+  let evento = null, proxEvento = rnd(10, 20);
   const encerra = (ev, exceto) => {
     ev.parts.forEach((p) => {
       p.evento = null; p.olharM = null; p.inclina = 0; p.el.style.zIndex = ""; p.chao = 0;
       if (p !== exceto && !["susto", "corre"].includes(p.estado)) { p.estado = "parado"; p.espera = rnd(1, 2.5); p.cansado = Math.max(p.cansado, 0.8); }
     });
     if (ev.corda) ev.corda.remove();
-    if (evento === ev) { evento = null; proxEvento = rnd(35, 60); }
+    if (evento === ev) { evento = null; proxEvento = rnd(15, 30); }
   };
   const assusta = (m, x) => {
     if (m.evento) encerra(m.evento, m);
@@ -406,8 +410,8 @@
           m.apertado = false;
           const vez = agoraS >= (m.proxAcao || 0), r = Math.random();
           if (m.espia) {
-            if (vez && r < 0.25 && disponivel("bolha")) { usa(m, "bolha"); iniciaAcao(m, "bolha"); }
-            else if (vez && m.x > -10 && r < 0.5 && disponivel("acena")) { usa(m, "acena"); iniciaAcao(m, "acena"); }
+            if (vez && r < 0.3 * peso("bolha")) { usa(m, "bolha"); iniciaAcao(m, "bolha"); }
+            else if (vez && m.x > -10 && r < 0.6 * peso("acena")) { usa(m, "acena"); iniciaAcao(m, "acena"); }
             else { m.alvo = m.x > -10 ? (Math.random() < 0.5 ? -30 : -10) : 6; m.vmax = 30; m.estado = "anda"; }
           } else if (!perto && vez && r < 0.45 && (m.prox = sorteiaAcao(m))) {
             usa(m, m.prox);
@@ -655,14 +659,14 @@
   const eventos = (dt) => {
     if (evento) return atualiza(evento, dt);
     if (noite() || chuva.fase !== "nada" || (proxEvento -= dt) > 0) return;
-    proxEvento = rnd(35, 60);
+    proxEvento = rnd(15, 30);
     const livres = doChao.filter(livre), opc = [];
     if (livres.length >= 2) opc.push("pega", "cochicho", "cabo");
     if (livres.length === 3 && B.orelhudo && B.pilula && B.gota) opc.push("piramide");
-    const ok = opc.filter((n) => disponivel("ev:" + n)); // cada brincadeira só se repete depois de 90s
-    if (!ok.length) return;
-    const n = ok[Math.floor(Math.random() * ok.length)];
-    pronto.set("ev:" + n, agoraS + 90);
+    if (!opc.length) { proxEvento = rnd(3, 6); return; } // ninguém livre agora: tenta de novo logo
+    if (livres.length === 3) opc.push("piramide"); // pirâmide depende dos 3 livres: um pouco mais de chance
+    const n = sorteia(opc.map((x) => "ev:" + x), 40).slice(3); // brincadeira recente fica menos provável
+    usadas.set("ev:" + n, agoraS);
     evento = comeca(n, n === "cabo" ? livres.slice(0, 2) : livres);
   };
 
