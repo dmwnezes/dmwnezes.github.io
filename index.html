@@ -216,18 +216,43 @@
 
   const chaoEl = document.querySelector(".trilha.chao");
   const doChao = bichos.filter((m) => m.trilha === chaoEl);
-  let gota = null, proxGota = rnd(8, 14);
+  let gota = null, proxGota = rnd(10, 18);
   const pausas = new Map();
+
+  // Prefere destinos longe dos vizinhos da mesma faixa; às vezes (15%) aceita ficar perto
+  const vizinhos = (m) => bichos.filter((o) => o !== m && o.trilha === m.trilha && !o.espia);
+  const escolheAlvo = (m, a, b) => {
+    const viz = vizinhos(m), ocupados = viz.flatMap((o) => [o.x, o.alvo]);
+    const parados = viz.filter((o) => o.estado !== "anda" && o.estado !== "corre").map((o) => o.x);
+    const tolera = Math.random() < 0.15;
+    let melhor = rnd(a, b), nota = -1;
+    for (let k = 0; k < 14; k++) {
+      const n = rnd(a, b);
+      if (Math.abs(n - m.x) < 30 && b - a > 60) continue;
+      let dist = ocupados.length ? Math.min(...ocupados.map((x) => Math.abs(x - n))) : 1e3;
+      // evita passar por cima/na frente de quem está parado no caminho
+      if (parados.some((x) => (x - m.x) * (x - n) < 0)) dist = Math.min(dist, 10);
+      if (tolera || dist >= 56) return n;
+      if (dist > nota) { nota = dist; melhor = n; }
+    }
+    return melhor;
+  };
 
   const passo = (m, dt, t) => {
     const [a, b] = m.faixa(), el = m.el;
     el.classList.toggle("dorme", ((noite() && m.estado === "parado") || (m.estado === "acao" && m.acao === "cochilo")) && !el.classList.contains("assustado"));
     if (m.estado === "parado") {
       if (m.cansado > 0) m.cansado -= dt;
-      else if (!el.classList.contains("dorme") && (m.espera -= dt) <= 0) {
-        if (m.espia) { m.alvo = m.x > -10 ? (Math.random() < 0.5 ? -30 : -10) : 6; m.vmax = 30; m.estado = "anda"; }
-        else if (Math.random() < 0.4) iniciaAcao(m, ["pulinhos", "espreguica", "olha", "danca", "cochilo"][Math.floor(Math.random() * 5)]);
-        else { let n; do n = rnd(a, b); while (Math.abs(n - m.x) < 30 && b - a > 60); m.alvo = n; m.vmax = rnd(20, 32); m.estado = "anda"; }
+      else if (!el.classList.contains("dorme")) {
+        // apertado ao lado de outro? sai mais cedo (com tolerância: espera um pouco antes)
+        const perto = !m.espia && vizinhos(m).some((o) => Math.abs(o.x - m.x) < 34);
+        if (perto && !m.apertado) { m.apertado = true; m.espera = Math.min(m.espera, rnd(0.8, 2)); }
+        if ((m.espera -= dt) <= 0) {
+          m.apertado = false;
+          if (m.espia) { m.alvo = m.x > -10 ? (Math.random() < 0.5 ? -30 : -10) : 6; m.vmax = 30; m.estado = "anda"; }
+          else if (!perto && Math.random() < 0.4) iniciaAcao(m, ["pulinhos", "espreguica", "olha", "danca", "cochilo"][Math.floor(Math.random() * 5)]);
+          else { m.alvo = escolheAlvo(m, a, b); m.vmax = rnd(20, 32); m.estado = "anda"; }
+        }
       }
     } else if (m.estado === "acao") {
       m.tA += dt;
@@ -335,7 +360,7 @@
       if (pegou) { iniciaAcao(pegou, "comemora"); pegou.sq = 0.5; corredores.filter((m) => m !== pegou).forEach((m) => iniciaAcao(m, "triste")); fim = true; }
     }
     if (!fim && gota.y >= -6) { gota.el.classList.add("splash"); corredores.forEach((m) => iniciaAcao(m, "triste")); fim = true; }
-    if (fim) { const el = gota.el; setTimeout(() => el.remove(), 300); if (!el.classList.contains("splash")) el.remove(); gota = null; proxGota = rnd(12, 22); }
+    if (fim) { const el = gota.el; setTimeout(() => el.remove(), 300); if (!el.classList.contains("splash")) el.remove(); gota = null; proxGota = rnd(22, 38); }
   };
 
   // Briga: dois bichos do rodapé se encontram, um sobe no outro e empurra
@@ -345,8 +370,8 @@
       if ((pausas.get(chave) || 0) > t || noite()) continue;
       if (!["parado", "anda"].includes(p.estado) || !["parado", "anda"].includes(q.estado)) continue;
       if (Math.abs(p.x - q.x) > 30) continue;
-      if (Math.random() < 0.5) { pausas.set(chave, t + 8); continue; }
-      pausas.set(chave, t + 25);
+      if (Math.random() < 0.7) { pausas.set(chave, t + 10); continue; }
+      pausas.set(chave, t + 40);
       const [s1, s2] = Math.random() < 0.5 ? [p, q] : [q, p];
       const lado = Math.sign(s1.x - s2.x) || 1;
       s1.face = -lado; s2.face = lado; s1.v = s2.v = 0;
