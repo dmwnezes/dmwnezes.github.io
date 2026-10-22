@@ -105,11 +105,12 @@
   .grupo.aberto { grid-template-rows: 0fr 1fr; transform: none; background: var(--surface); }
   .grupo.aberto .grupo-icones { opacity: 0; }
   .grupo.aberto .grupo-lista { opacity: 1; transition-delay: .12s; }
-  .sub { display: flex; align-items: center; gap: 14px; padding: clamp(2px, 1vh, 10px) 10px; border-radius: 18px; color: inherit; text-decoration: none; transition: background .2s ease; }
+  .sub { display: flex; align-items: center; gap: 14px; padding: clamp(2px, .6vh, 8px) 10px; border-radius: 18px; color: inherit; text-decoration: none; transition: background .2s ease; }
   .sub:hover, .sub:focus-visible { background: var(--surface-high); outline: none; }
   .sub:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
   .sub:hover .arrow { transform: translateX(3px); }
-  .sub .ico { width: clamp(42px, 8vh, 52px); height: clamp(42px, 8vh, 52px); }
+  .sub .ico { width: clamp(36px, 6vh, 48px); height: clamp(36px, 6vh, 48px); }
+  .sub .ico svg { max-width: 78%; max-height: 78%; }
   /* com 3 sites no grupo aberto, telas baixas apertam o respiro do rodapé para não rolar */
   @media (max-height: 720px) { body:has(.grupo.aberto) footer { padding-top: 6px; } }
   footer { position: relative; width: 100%; max-width: 440px; display: flex; justify-content: center; }
@@ -173,10 +174,11 @@
   <div class="slot">
   <button class="bicho espia" type="button" data-forma="bola" aria-label="Mascote Bolinha"></button>
   <div class="link grupo" id="grupo">
-    <button class="grupo-icones" type="button" aria-expanded="false" aria-controls="grupo-lista" aria-label="Abrir: Bússola Política, Propostas às Cegas e Retrato do Brasil">
+    <button class="grupo-icones" type="button" aria-expanded="false" aria-controls="grupo-lista" aria-label="Abrir: Bússola Política, Propostas às Cegas, Retrato do Brasil e Matinê">
       <span class="ico i-bussola" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 96 96" fill="none"><circle cx="48" cy="48" r="38" stroke="#2B2A27" stroke-width="6"/><path d="M48 48 63 29 52 52Z" fill="#9C7A45"/><path d="M48 48 33 67 44 44Z" fill="#8A857C"/></svg></span>
       <span class="ico i-cegas" aria-hidden="true">?</span>
       <span class="ico i-retrato" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 32 32"><rect x="5" y="17" width="5" height="10" rx="1.5" fill="#F2C14E"/><rect x="13.5" y="10" width="5" height="17" rx="1.5" fill="#73C7B4"/><rect x="22" y="4" width="5" height="23" rx="1.5" fill="#FFFFFF"/></svg></span>
+      <span class="ico i-matine" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 100 100"><path fill-rule="evenodd" fill="#E6C14F" d="M14,30Q14,24 20,24H80Q86,24 86,30V41A9,9 0,0 0,86 59V70Q86,76 80,76H20Q14,76 14,70V59A9,9 0,0 0,14 41Z M33,38V62L53,50Z M64.8,30h2.4v4h-2.4z M64.8,38h2.4v4h-2.4z M64.8,46h2.4v4h-2.4z M64.8,54h2.4v4h-2.4z M64.8,62h2.4v4h-2.4z"/></svg></span>
     </button>
     <div class="grupo-lista" id="grupo-lista">
       <div>
@@ -195,16 +197,15 @@
           <span class="txt"><b>Retrato do Brasil</b><small>Estatísticas no mapa</small></span>
           <span class="arrow" aria-hidden="true">→</span>
         </a>
+        <a class="sub" href="/matine/" tabindex="-1">
+          <span class="ico i-matine" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 100 100"><path fill-rule="evenodd" fill="#E6C14F" d="M14,30Q14,24 20,24H80Q86,24 86,30V41A9,9 0,0 0,86 59V70Q86,76 80,76H20Q14,76 14,70V59A9,9 0,0 0,14 41Z M33,38V62L53,50Z M64.8,30h2.4v4h-2.4z M64.8,38h2.4v4h-2.4z M64.8,46h2.4v4h-2.4z M64.8,54h2.4v4h-2.4z M64.8,62h2.4v4h-2.4z"/></svg></span>
+          <span class="txt"><b>Matinê</b><small>Filmes juntos, sincronizados</small></span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
       </div>
     </div>
   </div>
   </div>
-
-  <a class="link" href="/matine/">
-    <span class="ico i-matine" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 100 100"><path fill-rule="evenodd" fill="#E6C14F" d="M14,30Q14,24 20,24H80Q86,24 86,30V41A9,9 0,0 0,86 59V70Q86,76 80,76H20Q14,76 14,70V59A9,9 0,0 0,14 41Z M33,38V62L53,50Z M64.8,30h2.4v4h-2.4z M64.8,38h2.4v4h-2.4z M64.8,46h2.4v4h-2.4z M64.8,54h2.4v4h-2.4z M64.8,62h2.4v4h-2.4z"/></svg></span>
-    <span class="txt"><b>Matinê</b><small>Filmes juntos, sincronizados</small></span>
-    <span class="arrow" aria-hidden="true">→</span>
-  </a>
 </main>
 
 <footer>
@@ -214,7 +215,7 @@
   criado por: @dmwnezes
 </a></footer>
 <script>
-// Botão da Bússola + Propostas + Retrato do Brasil: abre ao tocar; fecha ao tocar fora ou com Esc
+// Botão da Bússola + Propostas + Retrato do Brasil + Matinê: abre ao tocar; fecha ao tocar fora ou com Esc
 (() => {
   const g = document.getElementById("grupo"), bt = g.querySelector(".grupo-icones"), subs = g.querySelectorAll(".sub");
   const abre = (sim) => {
